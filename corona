@@ -164,6 +164,214 @@ get_gender()
     echo "Z: $num_of_women"   
 }
 
+# Print number of persons sorted by their age. If input is get_gender "x",
+# return value is total number of all infected people sorted by age. 
+get_age()
+{
+    declare -i num_0_5=0
+    declare -i num_6_15=0
+    declare -i num_16_25=0
+    declare -i num_26_35=0
+    declare -i num_36_45=0
+    declare -i num_46_55=0
+    declare -i num_56_65=0
+    declare -i num_66_75=0
+    declare -i num_76_85=0
+    declare -i num_86_95=0
+    declare -i num_96_105=0
+    declare -i num_105=0
+
+    declare -i actual_line=0    # This counter is for skipping first line
+ 
+    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
+        do
+            actual_line=$((actual_line + 1))
+            
+            if [ "$actual_line" != "1" ]
+            then
+                if [ "$1" == "-a" ] # data after date
+                then
+                    if [[ "$datum" > "$2" ]]
+                    then
+                        if [ "$vek" -lt "6" ]
+                        then
+                            num_0_5=$((num_0_5 + 1))
+                        elif [ "$vek" -lt  "16" ]
+                        then
+                            num_6_15=$((num_6_15 + 1))
+                        elif [ "$vek" -lt  "26" ]
+                        then
+                            num_16_25=$((num_16_25 + 1))
+                        elif [ "$vek" -lt  "36" ]
+                        then
+                            num_26_35=$((num_26_35 + 1))
+                        elif [ "$vek" -lt  "46" ]
+                        then
+                            num_36_45=$((num_36_45 + 1))
+                        elif [ "$vek" -lt  "56" ]
+                        then
+                            num_46_55=$((num_46_55 + 1))
+                        elif [ "$vek" -lt  "66" ]
+                        then
+                            num_56_65=$((num_56_65 + 1))
+                        elif [ "$vek" -lt  "76" ]
+                        then
+                            num_66_75=$((num_66_75 + 1))
+                        elif [ "$vek" -lt  "86" ]
+                        then
+                            num_76_85=$((num_76_85 + 1))
+                        elif [ "$vek" -lt  "96" ]
+                        then
+                            num_86_95=$((num_86_95 + 1))
+                        elif [ "$vek" -lt  "106" ]
+                        then
+                            num_96_105=$((num_96_105 + 1))
+                        else
+                            num_105=$((num_105 + 1))
+                        fi 
+                    fi
+
+                elif [ "$1" == "-b" ] # date before
+                then
+                    if [[ "$datum" < "$2" ]]
+                    then
+                        if [ "$vek" -lt "6" ]
+                        then
+                            num_0_5=$((num_0_5 + 1))
+                        elif [ "$vek" -lt  "16" ]
+                        then
+                            num_6_15=$((num_6_15 + 1))
+                        elif [ "$vek" -lt  "26" ]
+                        then
+                            num_16_25=$((num_16_25 + 1))
+                        elif [ "$vek" -lt  "36" ]
+                        then
+                            num_26_35=$((num_26_35 + 1))
+                        elif [ "$vek" -lt  "46" ]
+                        then
+                            num_36_45=$((num_36_45 + 1))
+                        elif [ "$vek" -lt  "56" ]
+                        then
+                            num_46_55=$((num_46_55 + 1))
+                        elif [ "$vek" -lt  "66" ]
+                        then
+                            num_56_65=$((num_56_65 + 1))
+                        elif [ "$vek" -lt  "76" ]
+                        then
+                            num_66_75=$((num_66_75 + 1))
+                        elif [ "$vek" -lt  "86" ]
+                        then
+                            num_76_85=$((num_76_85 + 1))
+                        elif [ "$vek" -lt  "96" ]
+                        then
+                            num_86_95=$((num_86_95 + 1))
+                        elif [ "$vek" -lt  "106" ]
+                        then
+                            num_96_105=$((num_96_105 + 1))
+                        else
+                            num_105=$((num_105 + 1))
+                        fi 
+                    fi    
+                
+                elif [ "$1" == "-g" ] # gender
+                then
+                    if [ "$pohlavi" == "$2" ]
+                    then
+                        if [ "$vek" -lt "6" ]
+                        then
+                            num_0_5=$((num_0_5 + 1))
+                        elif [ "$vek" -lt  "16" ]
+                        then
+                            num_6_15=$((num_6_15 + 1))
+                        elif [ "$vek" -lt  "26" ]
+                        then
+                            num_16_25=$((num_16_25 + 1))
+                        elif [ "$vek" -lt  "36" ]
+                        then
+                            num_26_35=$((num_26_35 + 1))
+                        elif [ "$vek" -lt  "46" ]
+                        then
+                            num_36_45=$((num_36_45 + 1))
+                        elif [ "$vek" -lt  "56" ]
+                        then
+                            num_46_55=$((num_46_55 + 1))
+                        elif [ "$vek" -lt  "66" ]
+                        then
+                            num_56_65=$((num_56_65 + 1))
+                        elif [ "$vek" -lt  "76" ]
+                        then
+                            num_66_75=$((num_66_75 + 1))
+                        elif [ "$vek" -lt  "86" ]
+                        then
+                            num_76_85=$((num_76_85 + 1))
+                        elif [ "$vek" -lt  "96" ]
+                        then
+                            num_86_95=$((num_86_95 + 1))
+                        elif [ "$vek" -lt  "106" ]
+                        then
+                            num_96_105=$((num_96_105 + 1))
+                        else
+                            num_105=$((num_105 + 1))
+                        fi   
+                    fi 
+                else
+                    if [ "$vek" -lt "6" ]
+                    then
+                        num_0_5=$((num_0_5 + 1))
+                    elif [ "$vek" -lt  "16" ]
+                    then
+                        num_6_15=$((num_6_15 + 1))
+                    elif [ "$vek" -lt  "26" ]
+                    then
+                        num_16_25=$((num_16_25 + 1))
+                    elif [ "$vek" -lt  "36" ]
+                    then
+                        num_26_35=$((num_26_35 + 1))
+                    elif [ "$vek" -lt  "46" ]
+                    then
+                        num_36_45=$((num_36_45 + 1))
+                    elif [ "$vek" -lt  "56" ]
+                    then
+                        num_46_55=$((num_46_55 + 1))
+                    elif [ "$vek" -lt  "66" ]
+                    then
+                        num_56_65=$((num_56_65 + 1))
+                    elif [ "$vek" -lt  "76" ]
+                    then
+                        num_66_75=$((num_66_75 + 1))
+                    elif [ "$vek" -lt  "86" ]
+                    then
+                        num_76_85=$((num_76_85 + 1))
+                    elif [ "$vek" -lt  "96" ]
+                    then
+                        num_86_95=$((num_86_95 + 1))
+                    elif [ "$vek" -lt  "106" ]
+                    then
+                        num_96_105=$((num_96_105 + 1))
+                    else
+                        num_105=$((num_105 + 1))
+                    fi   
+                fi  
+
+              
+            fi
+        done < osoby.csv
+
+ 
+    echo "0-5: $num_0_5" 
+    echo "6-15: $num_6_15"
+    echo "16-25: $num_16_25"
+    echo "26-35: $num_26_35"
+    echo "36-45: $num_36_45"
+    echo "46-55: $num_46_55"
+    echo "56-65: $num_56_65"
+    echo "66-75: $num_66_75"
+    echo "76-85: $num_76_85"
+    echo "86-95: $num_86_95"
+    echo "96-105: $num_96_105"
+    echo ">105: $num_105"
+}
+
 ################################################
 ################### MAIN #######################
 ################################################
@@ -194,6 +402,16 @@ then
     else
         get_gender "x"
     fi   
+
+# Write age of infected people 
+elif [ "$1" = "age" ] || [ "$3" == "age" ]
+then 
+    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "age" ] # Filter is set
+    then
+        get_age "$1" "$2"   
+    else
+        get_age "x"
+    fi
 
 # No command
 else
