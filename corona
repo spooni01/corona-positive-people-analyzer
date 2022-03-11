@@ -5,22 +5,61 @@
 # Author:   Adam Ližičiar, xlizic00           #
 ###############################################
 
+RED="\033[0;31m"
+NOCOLOR="\033[0m"
+
 ################# Functions ###################
 
+# Write help text
+help()
+{
+    printf "${RED}"
+    echo "--------------------------------------------------"
+    echo "|                                                |"
+    echo "|       CORONA - POSITIVE USER ANALYZER          |"
+    echo "|                                                |"
+    echo "--------------------------------------------------"
+    printf "${NOCOLOR}"
+    echo "FORMAT:"
+    echo "corona [-h] [FILTERS] [COMMAND] [LOG [LOG2 [...]]"
+    echo "--------------------------------------------------"
+    echo "MAIN:"
+    echo "-h -> vypise pomocnik"
+    echo "--------------------------------------------------"
+    echo "FILTERS:"
+    echo "-a DATETIME -> vypis zaznamov iba pod danom datume"
+    echo "-b DATETIME -> vypis zaznamov iba pred danym datumom"
+    echo "-g GENDER -> filter podla pohlavia (M = muzi, Z = zeny)"
+    echo "-s [WIDTH] -> vypis dat graficky"
+    echo "--------------------------------------------------"
+    echo "COMMAND:"
+    echo "infected -> spocita pocet nakazenych"
+    echo "merge -> spoji subory so zaznamami do jedneho"
+    echo "gender -> pocet nakazenych pre jednotlive pohlavia"
+    echo "age -> statistika nakazenych podla veku"
+    echo "daily -> statistika nakazenych pre jednotlive dni"
+    echo "monthly -> statistika nakazenych pre jednotlive mesiace"
+    echo "yearly -> statistika nakazenych pre jednotlive roky"
+    echo "countries -> stastika nakazenych pre krajiny nakazy"
+    echo "districts -> stastika nakazenych pre okresy"   
+    echo "regions -> stastika nakazenych pre kraje"
+    printf "${RED}"
+    echo "--------------------------------------------------"
+    printf "${NOCOLOR}"
+}
 
 ################### Main #######################
 export POSIXLY_CORRECT=yes
-USAGE_STRING=$(printf "usage:\n\t$0 [-h] [FILTERS] [COMMAND]")
 
-# Help
+# Help (in this case just print help text and end program)
 if  [ "$1" = "-h" ] 
 then
-    echo "TODO: Napoveda"
+    help
 
 # Write help
-elif [ "$1" = "-a" ] && echo "$2" | grep -qE "[0-9]{4}-[0-9]{2}-[0-9]{2}" && [ "$2" != "" ] 
+elif [ "$1" = "-a" ] && print "$2" | grep -qE "[0-9]{4}-[0-9]{2}-[0-9]{2}" && [ "$2" != "" ] 
 then
-    echo "datetime format ok"
+    printf "datetime format ok"
 fi
 
 exit 0
