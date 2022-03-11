@@ -53,6 +53,45 @@ help()
     printf "${NOCOLOR}"
 }
 
+get_num_of_infected()
+{
+    declare -i num=0
+    declare -i actual_line=0    # This counter is for skipping first line
+        
+    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
+        do
+            actual_line=$((actual_line + 1))
+
+            if [ "$actual_line" != "1" ]
+            then
+                num=$((num + 1))
+            fi
+        done < osoby.csv
+
+    echo "$num"   
+}
+
+get_num_of_gender()
+{
+    declare -i num=0
+    declare -i actual_line=0    # This counter is for skipping first line
+ 
+    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
+        do
+            actual_line=$((actual_line + 1))
+            
+            if [ "$actual_line" != "1" ]
+            then
+                if [ "$pohlavi" == "$1" ]
+                then
+                    num=$((num + 1))
+                fi
+            fi
+        done < osoby.csv
+
+    echo "$num"   
+}
+
 ################################################
 ################### MAIN #######################
 ################################################
@@ -73,11 +112,11 @@ then
 # Write infected people
 elif [ "$1" = "infected" ] || [ "$3" == "infected" ]
 then 
-    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "infected" ]
+    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "infected" ] # Filter is set
     then
-        echo "todo: write just infected people"
+        get_num_of_gender "$2"   
     else
-        echo "todo: write by filter"
+        get_num_of_infected
     fi    
 
 # No command
