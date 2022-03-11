@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 
 ###############################################
+#                                             #
 # Name:     Corona - positive people analyzer #
 # Author:   Adam Ližičiar, xlizic00           #
+#                                             #
 ###############################################
 
+#colors
 RED="\033[0;31m"
 NOCOLOR="\033[0m"
 
-################# Functions ###################
+################################################
+################# FUNCTIONS ####################
+################################################
 
 # Write help text
 help()
@@ -48,7 +53,10 @@ help()
     printf "${NOCOLOR}"
 }
 
-################### Main #######################
+################################################
+################### MAIN #######################
+################################################
+
 export POSIXLY_CORRECT=yes
 
 # Help (in this case just print help text and end program)
@@ -60,6 +68,21 @@ then
 elif [ "$1" = "-a" ] && print "$2" | grep -qE "[0-9]{4}-[0-9]{2}-[0-9]{2}" && [ "$2" != "" ] 
 then
     printf "datetime format ok"
+
+
+# Write infected people
+elif [ "$1" = "infected" ] || [ "$3" == "infected" ]
+then 
+    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "infected" ]
+    then
+        echo "todo: write just infected people"
+    else
+        echo "todo: write by filter"
+    fi    
+
+# No command
+else
+    printf "Bol zadany nespravny tvar prikazu, pre napovedu napis ${RED}corona -h${NOCOLOR}\n"
 fi
 
 exit 0
