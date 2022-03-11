@@ -97,6 +97,73 @@ get_num()
     echo "$num"   
 }
 
+# Print number for each gender. If input is get_gender "x",
+# return value is total number of all infected people sorted
+# by gender. 
+get_gender()
+{
+    declare -i num_of_men=0
+    declare -i num_of_women=0
+    declare -i actual_line=0    # This counter is for skipping first line
+ 
+    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
+        do
+            actual_line=$((actual_line + 1))
+            
+            if [ "$actual_line" != "1" ]
+            then
+                if [ "$1" == "-a" ] # data after date
+                then
+                    if [[ "$datum" > "$2" ]]
+                    then
+                        if [ "$pohlavi" == "M" ] # add 1 to the correct gender
+                        then
+                            num_of_men=$((num_of_men + 1))
+                        else
+                            num_of_women=$((num_of_women + 1))
+                        fi        
+                    fi
+
+                elif [ "$1" == "-b" ] # date before
+                then
+                    if [[ "$datum" < "$2" ]]
+                    then
+                        if [ "$pohlavi" == "M" ] # add 1 to the correct gender
+                        then
+                            num_of_men=$((num_of_men + 1))
+                        else
+                            num_of_women=$((num_of_women + 1))
+                        fi  
+                    fi    
+                
+                elif [ "$1" == "-g" ] # gender
+                then
+                    if [ "$pohlavi" == "$2" ]
+                    then
+                        if [ "$pohlavi" == "M" ] # add 1 to the correct gender
+                        then
+                            num_of_men=$((num_of_men + 1))
+                        else
+                            num_of_women=$((num_of_women + 1))
+                        fi  
+                    fi 
+                else
+                    if [ "$pohlavi" == "M" ] # add 1 to the correct gender
+                    then
+                        num_of_men=$((num_of_men + 1))
+                    else
+                        num_of_women=$((num_of_women + 1))
+                    fi    
+                fi  
+
+              
+            fi
+        done < osoby.csv
+
+    echo "M: $num_of_men" 
+    echo "Z: $num_of_women"   
+}
+
 ################################################
 ################### MAIN #######################
 ################################################
@@ -117,6 +184,16 @@ then
     else
         get_num "x"
     fi    
+
+# Write gender of infected people 
+elif [ "$1" = "gender" ] || [ "$3" == "gender" ]
+then 
+    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "gender" ] # Filter is set
+    then
+        get_gender "$1" "$2"   
+    else
+        get_gender "x"
+    fi   
 
 # No command
 else
