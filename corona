@@ -15,7 +15,7 @@ NOCOLOR="\033[0m"
 ################# FUNCTIONS ####################
 ################################################
 
-# Write help text
+# Write help text to the terminal.
 help()
 {
     printf "${RED}"
@@ -53,25 +53,9 @@ help()
     printf "${NOCOLOR}"
 }
 
-get_num_of_infected()
-{
-    declare -i num=0
-    declare -i actual_line=0    # This counter is for skipping first line
-        
-    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-        do
-            actual_line=$((actual_line + 1))
-
-            if [ "$actual_line" != "1" ]
-            then
-                num=$((num + 1))
-            fi
-        done < osoby.csv
-
-    echo "$num"   
-}
-
-get_num_of_gender()
+# Print number of persons in table by filter. If input is get_num "x",
+# return value is total number of all infected people. 
+get_num()
 {
     declare -i num=0
     declare -i actual_line=0    # This counter is for skipping first line
@@ -82,10 +66,31 @@ get_num_of_gender()
             
             if [ "$actual_line" != "1" ]
             then
-                if [ "$pohlavi" == "$1" ]
+                if [ "$1" == "-a" ] # data after date
                 then
-                    num=$((num + 1))
-                fi
+                    if [[ "$datum" > "$2" ]]
+                    then
+                        num=$((num + 1))
+                    fi
+
+                elif [ "$1" == "-b" ] # date before
+                then
+                    if [[ "$datum" < "$2" ]]
+                    then
+                        num=$((num + 1))
+                    fi    
+                
+                elif [ "$1" == "-g" ] # gender
+                then
+                    if [ "$pohlavi" == "$2" ]
+                    then
+                        num=$((num + 1))
+                    fi 
+                else
+                    num=$((num + 1))   
+                fi  
+
+              
             fi
         done < osoby.csv
 
@@ -103,20 +108,14 @@ if  [ "$1" = "-h" ]
 then
     help
 
-# Write help
-elif [ "$1" = "-a" ] && print "$2" | grep -qE "[0-9]{4}-[0-9]{2}-[0-9]{2}" && [ "$2" != "" ] 
-then
-    printf "datetime format ok"
-
-
 # Write infected people
 elif [ "$1" = "infected" ] || [ "$3" == "infected" ]
 then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "infected" ] # Filter is set
     then
-        get_num_of_gender "$2"   
+        get_num "$1" "$2"   
     else
-        get_num_of_infected
+        get_num "x"
     fi    
 
 # No command
