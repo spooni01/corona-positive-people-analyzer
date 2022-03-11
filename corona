@@ -463,7 +463,7 @@ get_daily()
         done < osoby.csv
 }
 
-# Print number of persons in table by day filter. If input is get_num "x",
+# Print number of persons in table by monthly filter. If input is get_num "x",
 # return value is total number of all infected people. 
 get_monthly()
 {
@@ -570,6 +570,113 @@ get_monthly()
     echo "$date: $num"
 }
 
+# Print number of persons in table by yearly filter. If input is get_num "x",
+# return value is total number of all infected people. 
+get_yearly()
+{
+    declare -i num=1 #start at 1 because first one is skiped
+    declare -i actual_line=0    # This counter is for skipping first line
+    date=""
+
+    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
+        do
+            actual_line=$((actual_line + 1))
+            
+            if [ "$actual_line" != "1" ]
+            then
+                if [ "$1" == "-a" ] # data after date
+                then
+                    if [[ "$datum" > "$2" ]]
+                    then
+                        if [ "$date" == "" ]
+                        then
+                            date=$(date +$datum)
+                            date=${date::-6} #delete last 3 chars
+                        else
+                            datum=${datum::-6} #format $datum
+
+                            if [ "$date" == "$datum" ]
+                            then
+                                num=$((num + 1))
+                            else
+                                echo "$date: $num"
+                                num=$((1))
+
+                                date=$(date +$datum)
+                            fi 
+                        fi
+                    fi
+
+                elif [ "$1" == "-b" ] # date before
+                then
+                    if [[ "$datum" < "$2" ]]
+                    then
+                        if [ "$date" == "" ]
+                        then
+                            date=$(date +$datum)
+                            date=${date::-6} #delete last 3 chars
+                        else
+                            datum=${datum::-6} #format $datum
+
+                            if [ "$date" == "$datum" ]
+                            then
+                                num=$((num + 1))
+                            else
+                                echo "$date: $num"
+                                num=$((1))
+
+                                date=$(date +$datum)
+                            fi 
+                        fi
+                    fi    
+                
+                elif [ "$1" == "-g" ] # gender
+                then
+                    if [ "$pohlavi" == "$2" ]
+                    then
+                        if [ "$date" == "" ]
+                        then
+                            date=$(date +$datum)
+                            date=${date::-6} #delete last 3 chars
+                        else
+                            datum=${datum::-6} #format $datum
+
+                            if [ "$date" == "$datum" ]
+                            then
+                                num=$((num + 1))
+                            else
+                                echo "$date: $num"
+                                num=$((1))
+
+                                date=$(date +$datum)
+                            fi 
+                        fi
+                    fi 
+                else       
+                    if [ "$date" == "" ]
+                    then
+                        date=$(date +$datum)
+                        date=${date::-6} #delete last 3 chars
+                    else
+                        datum=${datum::-6} #format $datum
+
+                        if [ "$date" == "$datum" ]
+                        then
+                            num=$((num + 1))
+                        else
+                            echo "$date: $num"
+                            num=$((1))
+
+                            date=$(date +$datum)
+                        fi 
+                    fi
+                fi             
+            fi
+    done < osoby.csv
+
+    echo "$date: $num"
+}
+
 ################################################
 ################### MAIN #######################
 ################################################
@@ -629,6 +736,16 @@ then
         get_monthly "$1" "$2"   
     else
         get_monthly "x"
+    fi
+
+# Write infected people sorted by years
+elif [ "$1" = "yearly" ] || [ "$3" == "yearly" ]
+then 
+    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "yearly" ] # Filter is set
+    then
+        get_yearly "$1" "$2"   
+    else
+        get_yearly "x"
     fi
 
 # No command
