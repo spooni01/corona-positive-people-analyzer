@@ -372,6 +372,98 @@ get_age()
     echo ">105: $num_105"
 }
 
+# Print number of persons in table by filter. If input is get_num "x",
+# return value is total number of all infected people. 
+get_daily()
+{
+    declare -i num=0
+    declare -i actual_line=0    # This counter is for skipping first line
+    date=""
+
+    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
+        do
+            actual_line=$((actual_line + 1))
+            
+            if [ "$actual_line" != "1" ]
+            then
+                if [ "$1" == "-a" ] # data after date
+                then
+                    if [[ "$datum" > "$2" ]]
+                    then
+                        if [ "$date" == "" ]
+                        then
+                            date=$(date +$datum)
+                        fi
+
+                        if [ "$date" == "$datum" ]
+                        then
+                            num=$((num + 1))
+                        else
+                            echo "$date: $num"
+                            num=$((1))
+                            date=$(date +$datum)
+                        fi
+                    fi
+
+                elif [ "$1" == "-b" ] # date before
+                then
+                    if [[ "$datum" < "$2" ]]
+                    then
+                        if [ "$date" == "" ]
+                        then
+                            date=$(date +$datum)
+                        fi
+
+                        if [ "$date" == "$datum" ]
+                        then
+                            num=$((num + 1))
+                        else
+                            echo "$date: $num"
+                            num=$((1))
+                            date=$(date +$datum)
+                        fi
+                    fi    
+                
+                elif [ "$1" == "-g" ] # gender
+                then
+                    if [ "$pohlavi" == "$2" ]
+                    then
+                        if [ "$date" == "" ]
+                        then
+                            date=$(date +$datum)
+                        fi
+
+                        if [ "$date" == "$datum" ]
+                        then
+                            num=$((num + 1))
+                        else
+                            echo "$date: $num"
+                            num=$((1))
+                            date=$(date +$datum)
+                        fi
+                    fi 
+                else
+                    if [ "$date" == "" ]
+                    then
+                        date=$(date +$datum)
+                    fi
+
+                    if [ "$date" == "$datum" ]
+                    then
+                        num=$((num + 1))
+                    else
+                        echo "$date: $num"
+                        num=$((1))
+                        date=$(date +$datum)
+                    fi 
+                fi  
+
+              
+            fi
+        done < osoby.csv
+}
+
+
 ################################################
 ################### MAIN #######################
 ################################################
@@ -411,6 +503,16 @@ then
         get_age "$1" "$2"   
     else
         get_age "x"
+    fi
+
+# Write age of infected people 
+elif [ "$1" = "daily" ] || [ "$3" == "daily" ]
+then 
+    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "daily" ] # Filter is set
+    then
+        get_daily "$1" "$2"   
+    else
+        get_daily "x"
     fi
 
 # No command
