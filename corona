@@ -7,17 +7,179 @@
 #                                             #
 ###############################################
 
+#arrays
+ages=( 0 0 0 0 0 0 0 0 0 0 0 0 ) # store ages of people
+genders=( 0 0 0 ) # man, woman, none
+
+#variables
+declare -i daily_count=1
+declare -i monthly_count=1
+declare -i yearly_count=1
+daily_date=""
+monthly_date=""
+yearly_date=""
+
 #colors
 RED="\033[0;31m"
 NOCOLOR="\033[0m"
+
+################################################
+############### HELP FUNCTIONS #################
+################################################
+
+filter_a() { 
+    if [ "$1" != "1" ]
+    then
+        if [ "$2" == "-a" ] # data after date
+        then
+            if [[ "$3" > "$4" ]]
+            then
+                echo "1"
+                return
+            fi
+        fi
+    fi
+
+    echo "0"
+}
+filter_b() { 
+    if [ "$1" != "1" ]
+    then
+        if [ "$2" == "-a" ] # data after date
+        then
+            if [[ "$3" < "$4" ]]
+            then
+                echo "1"
+                return
+            fi
+        fi
+    fi
+
+    echo "0"
+}
+filter_g() {
+    if [ "$1" != "1" ]
+    then
+        if [ "$2" == "-g" ] # data after date
+        then
+            if [[ "$3" == "$4" ]]
+            then
+                echo "1"
+                return
+            fi
+        fi
+    fi
+
+    echo "0"   
+}
+
+# Functions will increase number in arrays
+add_one_to_ages() {
+    if [ "$1" -lt "6" ]
+    then
+        (( ages[0]++ ))
+    elif [ "$1" -lt  "16" ]
+    then
+        (( ages[1]++ ))
+    elif [ "$1" -lt  "26" ]
+    then
+        (( ages[2]++ ))
+    elif [ "$1" -lt  "36" ]
+    then
+        (( ages[3]++ ))
+    elif [ "$1" -lt  "46" ]
+    then
+        (( ages[4]++ ))
+    elif [ "$1" -lt  "56" ]
+    then
+        (( ages[5]++ ))
+    elif [ "$1" -lt  "66" ]
+    then
+        (( ages[6]++ ))
+    elif [ "$1" -lt  "76" ]
+    then
+        (( ages[7]++ ))
+    elif [ "$1" -lt  "86" ]
+    then
+        (( ages[8]++ ))
+    elif [ "$1" -lt  "96" ]
+    then
+        (( ages[9]++ ))
+    elif [ "$1" -lt  "106" ]
+    then
+        (( ages[10]++ ))
+    else
+        (( ages[11]++ ))
+    fi 
+}
+add_one_to_gender() {
+    if [ "$1" == "M" ] 
+    then
+        (( genders[0]++ ))
+    elif [ "$1" == "Z" ]
+    then
+        (( genders[1]++ ))
+    else 
+        (( genders[2]++ ))    
+    fi 
+}
+
+# Count dates and compare them
+count_days() {
+    if [ "$daily_date" == "" ]; then
+        daily_date=$(date +$1)
+    fi
+
+    if [ "$daily_date" == "$1" ]; then
+        daily_count=$((daily_count + 1))
+    else
+        echo "$daily_date: $daily_count"
+        daily_count=$((1))
+        daily_date=$(date +$1)
+    fi
+}
+count_months() {
+    if [ "$monthly_date" == "" ]; then
+        monthly_date=$(date +$1)
+        monthly_date=${monthly_date::-3} #delete last 3 chars
+    else
+        tmp_date=$(date +$1)
+        tmp_date=${tmp_date::-3} #format $tmp_date
+
+        if [ "$monthly_date" == "$tmp_date" ]; then
+            monthly_count=$((monthly_count + 1))
+        else
+            echo "$monthly_date: $monthly_count"    
+            monthly_count=$((1))
+            monthly_date=$(date +$tmp_date)
+        fi 
+    fi
+}
+count_years() {
+    if [ "$yearly_date" == "" ]; then
+        yearly_date=$(date +$1)
+        yearly_date=${yearly_date::-6} #delete last 6 chars
+    else
+        tmp_date=$(date +$1)
+        tmp_date=${tmp_date::-6} #format $tmp_date
+
+        if [ "$yearly_date" == "$tmp_date" ]; then
+            yearly_count=$((yearly_count + 1))
+        else
+            echo "$yearly_date: $yearly_count"    
+            yearly_count=$((1))
+            yearly_date=$(date +$tmp_date)
+        fi 
+    fi
+}
+
 
 ################################################
 ################# FUNCTIONS ####################
 ################################################
 
 # Write help text to the terminal.
-help()
-{
+help() {
     printf "${RED}"
     echo "--------------------------------------------------"
     echo "|                                                |"
@@ -55,44 +217,27 @@ help()
 
 # Print number of persons in table by filter. If input is get_num "x",
 # return value is total number of all infected people. 
-get_num()
-{
-    declare -i num=0
+get_num() {
+    declare -i num=-1
     declare -i actual_line=0    # This counter is for skipping first line
  
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-        do
-            actual_line=$((actual_line + 1))
-            
-            if [ "$actual_line" != "1" ]
-            then
-                if [ "$1" == "-a" ] # data after date
-                then
-                    if [[ "$datum" > "$2" ]]
-                    then
-                        num=$((num + 1))
-                    fi
+    do
+        actual_line=$((actual_line + 1))
+        tmp_return_filter_a=`filter_a "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_b=`filter_b "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
 
-                elif [ "$1" == "-b" ] # date before
-                then
-                    if [[ "$datum" < "$2" ]]
-                    then
-                        num=$((num + 1))
-                    fi    
-                
-                elif [ "$1" == "-g" ] # gender
-                then
-                    if [ "$pohlavi" == "$2" ]
-                    then
-                        num=$((num + 1))
-                    fi 
-                else
-                    num=$((num + 1))   
-                fi  
-
-              
-            fi
-        done < osoby.csv
+        if [ "$tmp_return_filter_a" == "1" ]; then
+            num=$((num + 1))  
+        elif [ "$tmp_return_filter_b" == "1" ]; then
+            num=$((num + 1))  
+        elif [ "$tmp_return_filter_g" == "1" ]; then
+            num=$((num + 1))  
+        else
+            num=$((num + 1))  
+        fi
+    done < osoby.csv
 
     echo "$num"   
 }
@@ -100,253 +245,55 @@ get_num()
 # Print number for each gender. If input is get_gender "x",
 # return value is total number of all infected people sorted
 # by gender. 
-get_gender()
-{
-    declare -i num_of_men=0
-    declare -i num_of_women=0
+get_gender() {
     declare -i actual_line=0    # This counter is for skipping first line
  
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-        do
-            actual_line=$((actual_line + 1))
-            
-            if [ "$actual_line" != "1" ]
-            then
-                if [ "$1" == "-a" ] # data after date
-                then
-                    if [[ "$datum" > "$2" ]]
-                    then
-                        if [ "$pohlavi" == "M" ] # add 1 to the correct gender
-                        then
-                            num_of_men=$((num_of_men + 1))
-                        else
-                            num_of_women=$((num_of_women + 1))
-                        fi        
-                    fi
+    do
+        actual_line=$((actual_line + 1))
+        tmp_return_filter_a=`filter_a "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_b=`filter_b "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
 
-                elif [ "$1" == "-b" ] # date before
-                then
-                    if [[ "$datum" < "$2" ]]
-                    then
-                        if [ "$pohlavi" == "M" ] # add 1 to the correct gender
-                        then
-                            num_of_men=$((num_of_men + 1))
-                        else
-                            num_of_women=$((num_of_women + 1))
-                        fi  
-                    fi    
-                
-                elif [ "$1" == "-g" ] # gender
-                then
-                    if [ "$pohlavi" == "$2" ]
-                    then
-                        if [ "$pohlavi" == "M" ] # add 1 to the correct gender
-                        then
-                            num_of_men=$((num_of_men + 1))
-                        else
-                            num_of_women=$((num_of_women + 1))
-                        fi  
-                    fi 
-                else
-                    if [ "$pohlavi" == "M" ] # add 1 to the correct gender
-                    then
-                        num_of_men=$((num_of_men + 1))
-                    else
-                        num_of_women=$((num_of_women + 1))
-                    fi    
-                fi  
+        if [ "$tmp_return_filter_a" == "1" ]; then
+            add_one_to_gender $pohlavi
+        elif [ "$tmp_return_filter_b" == "1" ]; then
+            add_one_to_gender $pohlavi
+        elif [ "$tmp_return_filter_g" == "1" ]; then
+            add_one_to_gender $pohlavi
+        else
+            add_one_to_gender $pohlavi
+        fi    
+    done < osoby.csv
 
-              
-            fi
-        done < osoby.csv
-
-    echo "M: $num_of_men" 
-    echo "Z: $num_of_women"   
+    printf "M: ${genders[0]}\n" 
+    printf "Z: ${genders[1]}\n" 
+    printf "None: ${genders[2]}\n" 
 }
 
 # Print number of persons sorted by their age. If input is get_gender "x",
 # return value is total number of all infected people sorted by age. 
-get_age()
-{
-    ages=( 0 0 0 0 0 0 0 0 0 0 0 0 ) 
-
+get_age() {
     declare -i actual_line=0    # This counter is for skipping first line
- 
+
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-        do
-            actual_line=$((actual_line + 1))
-            
-            if [ "$actual_line" != "1" ]
-            then
-                if [ "$1" == "-a" ] # data after date
-                then
-                    if [[ "$datum" > "$2" ]]
-                    then
-                        if [ "$vek" -lt "6" ]
-                        then
-                            (( ages[0]++ ))
-                        elif [ "$vek" -lt  "16" ]
-                        then
-                            (( ages[1]++ ))
-                        elif [ "$vek" -lt  "26" ]
-                        then
-                            (( ages[2]++ ))
-                        elif [ "$vek" -lt  "36" ]
-                        then
-                            (( ages[3]++ ))
-                        elif [ "$vek" -lt  "46" ]
-                        then
-                            (( ages[4]++ ))
-                        elif [ "$vek" -lt  "56" ]
-                        then
-                            (( ages[5]++ ))
-                        elif [ "$vek" -lt  "66" ]
-                        then
-                            (( ages[6]++ ))
-                        elif [ "$vek" -lt  "76" ]
-                        then
-                            (( ages[7]++ ))
-                        elif [ "$vek" -lt  "86" ]
-                        then
-                            (( ages[8]++ ))
-                        elif [ "$vek" -lt  "96" ]
-                        then
-                            (( ages[9]++ ))
-                        elif [ "$vek" -lt  "106" ]
-                        then
-                            (( ages[10]++ ))
-                        else
-                            (( ages[11]++ ))
-                        fi 
-                    fi
+    do
+        actual_line=$((actual_line + 1))
+        tmp_return_filter_a=`filter_a "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_b=`filter_b "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
 
-                elif [ "$1" == "-b" ] # date before
-                then
-                    if [[ "$datum" < "$2" ]]
-                    then
-                        if [ "$vek" -lt "6" ]
-                        then
-                            (( ages[0]++ ))
-                        elif [ "$vek" -lt  "16" ]
-                        then
-                            (( ages[1]++ ))
-                        elif [ "$vek" -lt  "26" ]
-                        then
-                            (( ages[2]++ ))
-                        elif [ "$vek" -lt  "36" ]
-                        then
-                            (( ages[3]++ ))
-                        elif [ "$vek" -lt  "46" ]
-                        then
-                            (( ages[4]++ ))
-                        elif [ "$vek" -lt  "56" ]
-                        then
-                            (( ages[5]++ ))
-                        elif [ "$vek" -lt  "66" ]
-                        then
-                            (( ages[6]++ ))
-                        elif [ "$vek" -lt  "76" ]
-                        then
-                            (( ages[7]++ ))
-                        elif [ "$vek" -lt  "86" ]
-                        then
-                            (( ages[8]++ ))
-                        elif [ "$vek" -lt  "96" ]
-                        then
-                            (( ages[9]++ ))
-                        elif [ "$vek" -lt  "106" ]
-                        then
-                            (( ages[10]++ ))
-                        else
-                            (( ages[11]++ ))
-                        fi 
-                    fi    
-                
-                elif [ "$1" == "-g" ] # gender
-                then
-                    if [ "$pohlavi" == "$2" ]
-                    then
-                        if [ "$vek" -lt "6" ]
-                        then
-                            (( ages[0]++ ))
-                        elif [ "$vek" -lt  "16" ]
-                        then
-                            (( ages[1]++ ))
-                        elif [ "$vek" -lt  "26" ]
-                        then
-                            (( ages[2]++ ))
-                        elif [ "$vek" -lt  "36" ]
-                        then
-                            (( ages[3]++ ))
-                        elif [ "$vek" -lt  "46" ]
-                        then
-                            (( ages[4]++ ))
-                        elif [ "$vek" -lt  "56" ]
-                        then
-                            (( ages[5]++ ))
-                        elif [ "$vek" -lt  "66" ]
-                        then
-                            (( ages[6]++ ))
-                        elif [ "$vek" -lt  "76" ]
-                        then
-                            (( ages[7]++ ))
-                        elif [ "$vek" -lt  "86" ]
-                        then
-                            (( ages[8]++ ))
-                        elif [ "$vek" -lt  "96" ]
-                        then
-                            (( ages[9]++ ))
-                        elif [ "$vek" -lt  "106" ]
-                        then
-                            (( ages[10]++ ))
-                        else
-                            (( ages[11]++ ))
-                        fi 
-                    fi 
-                else
-                    if [ "$vek" -lt "6" ]
-                    then
-                        (( ages[0]++ ))
-                    elif [ "$vek" -lt  "16" ]
-                    then
-                        (( ages[1]++ ))
-                    elif [ "$vek" -lt  "26" ]
-                    then
-                        (( ages[2]++ ))
-                    elif [ "$vek" -lt  "36" ]
-                    then
-                        (( ages[3]++ ))
-                    elif [ "$vek" -lt  "46" ]
-                    then
-                        (( ages[4]++ ))
-                    elif [ "$vek" -lt  "56" ]
-                    then
-                        (( ages[5]++ ))
-                    elif [ "$vek" -lt  "66" ]
-                    then
-                        (( ages[6]++ ))
-                    elif [ "$vek" -lt  "76" ]
-                    then
-                        (( ages[7]++ ))
-                    elif [ "$vek" -lt  "86" ]
-                    then
-                        (( ages[8]++ ))
-                    elif [ "$vek" -lt  "96" ]
-                    then
-                        (( ages[9]++ ))
-                    elif [ "$vek" -lt  "106" ]
-                    then
-                        (( ages[10]++ ))
-                    else
-                        (( ages[11]++ ))
-                    fi   
-                fi  
+        if [ "$tmp_return_filter_a" == "1" ]; then
+            add_one_to_ages $vek
+        elif [ "$tmp_return_filter_b" == "1" ]; then
+            add_one_to_ages $vek
+        elif [ "$tmp_return_filter_g" == "1" ]; then
+            add_one_to_ages $vek
+        else
+            add_one_to_ages $vek
+        fi    
+    done < osoby.csv
 
-              
-            fi
-        done < osoby.csv
-
- 
     printf  "0-5:\t ${ages[0]}\n" 
     printf  "6-15:\t ${ages[1]}\n"
     printf  "16-25:\t ${ages[2]}\n"
@@ -363,307 +310,78 @@ get_age()
 
 # Print number of persons in table by day filter. If input is get_num "x",
 # return value is total number of all infected people. 
-get_daily()
-{
-    declare -i num=0
+get_daily() {
     declare -i actual_line=0    # This counter is for skipping first line
-    date=""
 
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-        do
-            actual_line=$((actual_line + 1))
-            
-            if [ "$actual_line" != "1" ]
-            then
-                if [ "$1" == "-a" ] # data after date
-                then
-                    if [[ "$datum" > "$2" ]]
-                    then
-                        if [ "$date" == "" ]
-                        then
-                            date=$(date +$datum)
-                        fi
+    do
+        actual_line=$((actual_line + 1))
+        tmp_return_filter_a=`filter_a "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_b=`filter_b "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
 
-                        if [ "$date" == "$datum" ]
-                        then
-                            num=$((num + 1))
-                        else
-                            echo "$date: $num"
-                            num=$((1))
-                            date=$(date +$datum)
-                        fi
-                    fi
-
-                elif [ "$1" == "-b" ] # date before
-                then
-                    if [[ "$datum" < "$2" ]]
-                    then
-                        if [ "$date" == "" ]
-                        then
-                            date=$(date +$datum)
-                        fi
-
-                        if [ "$date" == "$datum" ]
-                        then
-                            num=$((num + 1))
-                        else
-                            echo "$date: $num"
-                            num=$((1))
-                            date=$(date +$datum)
-                        fi
-                    fi    
-                
-                elif [ "$1" == "-g" ] # gender
-                then
-                    if [ "$pohlavi" == "$2" ]
-                    then
-                        if [ "$date" == "" ]
-                        then
-                            date=$(date +$datum)
-                        fi
-
-                        if [ "$date" == "$datum" ]
-                        then
-                            num=$((num + 1))
-                        else
-                            echo "$date: $num"
-                            num=$((1))
-                            date=$(date +$datum)
-                        fi
-                    fi 
-                else
-                    if [ "$date" == "" ]
-                    then
-                        date=$(date +$datum)
-                    fi
-
-                    if [ "$date" == "$datum" ]
-                    then
-                        num=$((num + 1))
-                    else
-                        echo "$date: $num"
-                        num=$((1))
-                        date=$(date +$datum)
-                    fi 
-                fi  
-
-              
-            fi
-        done < osoby.csv
+        if [ "$tmp_return_filter_a" == "1" ]; then
+            count_days $datum
+        elif [ "$tmp_return_filter_b" == "1" ]; then
+            count_days $datum
+        elif [ "$tmp_return_filter_g" == "1" ]; then
+            count_days $datum
+        elif [ "$actual_line" != "1" ]; then
+            count_days $datum
+        fi    
+    done < osoby.csv
 }
 
 # Print number of persons in table by monthly filter. If input is get_num "x",
 # return value is total number of all infected people. 
-get_monthly()
-{
-    declare -i num=1 #start at 1 because first one is skiped
+get_monthly() {
     declare -i actual_line=0    # This counter is for skipping first line
-    date=""
 
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-        do
-            actual_line=$((actual_line + 1))
-            
-            if [ "$actual_line" != "1" ]
-            then
-                if [ "$1" == "-a" ] # data after date
-                then
-                    if [[ "$datum" > "$2" ]]
-                    then
-                        if [ "$date" == "" ]
-                        then
-                            date=$(date +$datum)
-                            date=${date::-3} #delete last 3 chars
-                        else
-                            datum=${datum::-3} #format $datum
+    do
+        actual_line=$((actual_line + 1))
+        tmp_return_filter_a=`filter_a "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_b=`filter_b "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
 
-                            if [ "$date" == "$datum" ]
-                            then
-                                num=$((num + 1))
-                            else
-                                echo "$date: $num"
-                                num=$((1))
-
-                                date=$(date +$datum)
-                            fi 
-                        fi
-                    fi
-
-                elif [ "$1" == "-b" ] # date before
-                then
-                    if [[ "$datum" < "$2" ]]
-                    then
-                        if [ "$date" == "" ]
-                        then
-                            date=$(date +$datum)
-                            date=${date::-3} #delete last 3 chars
-                        else
-                            datum=${datum::-3} #format $datum
-
-                            if [ "$date" == "$datum" ]
-                            then
-                                num=$((num + 1))
-                            else
-                                echo "$date: $num"
-                                num=$((1))
-
-                                date=$(date +$datum)
-                            fi 
-                        fi
-                    fi    
-                
-                elif [ "$1" == "-g" ] # gender
-                then
-                    if [ "$pohlavi" == "$2" ]
-                    then
-                        if [ "$date" == "" ]
-                        then
-                            date=$(date +$datum)
-                            date=${date::-3} #delete last 3 chars
-                        else
-                            datum=${datum::-3} #format $datum
-
-                            if [ "$date" == "$datum" ]
-                            then
-                                num=$((num + 1))
-                            else
-                                echo "$date: $num"
-                                num=$((1))
-
-                                date=$(date +$datum)
-                            fi 
-                        fi
-                    fi 
-                else       
-                    if [ "$date" == "" ]
-                    then
-                        date=$(date +$datum)
-                        date=${date::-3} #delete last 3 chars
-                    else
-                        datum=${datum::-3} #format $datum
-
-                        if [ "$date" == "$datum" ]
-                        then
-                            num=$((num + 1))
-                        else
-                            echo "$date: $num"
-                            num=$((1))
-
-                            date=$(date +$datum)
-                        fi 
-                    fi
-                fi             
-            fi
+        if [ "$tmp_return_filter_a" == "1" ]; then
+            count_months $datum
+        elif [ "$tmp_return_filter_b" == "1" ]; then
+            count_months $datum
+        elif [ "$tmp_return_filter_g" == "1" ]; then
+            count_months $datum
+        elif [ "$actual_line" != "1" ]; then
+            count_months $datum
+        fi    
     done < osoby.csv
 
-    echo "$date: $num"
+    echo "$monthly_date: $monthly_count"
 }
 
 # Print number of persons in table by yearly filter. If input is get_num "x",
 # return value is total number of all infected people. 
-get_yearly()
-{
-    declare -i num=1 #start at 1 because first one is skiped
+get_yearly() {
     declare -i actual_line=0    # This counter is for skipping first line
-    date=""
 
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-        do
-            actual_line=$((actual_line + 1))
-            
-            if [ "$actual_line" != "1" ]
-            then
-                if [ "$1" == "-a" ] # data after date
-                then
-                    if [[ "$datum" > "$2" ]]
-                    then
-                        if [ "$date" == "" ]
-                        then
-                            date=$(date +$datum)
-                            date=${date::-6} #delete last 3 chars
-                        else
-                            datum=${datum::-6} #format $datum
+    do
+        actual_line=$((actual_line + 1))
+        tmp_return_filter_a=`filter_a "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_b=`filter_b "$actual_line" "$1" "$datum" "$2"`    
+        tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
 
-                            if [ "$date" == "$datum" ]
-                            then
-                                num=$((num + 1))
-                            else
-                                echo "$date: $num"
-                                num=$((1))
-
-                                date=$(date +$datum)
-                            fi 
-                        fi
-                    fi
-
-                elif [ "$1" == "-b" ] # date before
-                then
-                    if [[ "$datum" < "$2" ]]
-                    then
-                        if [ "$date" == "" ]
-                        then
-                            date=$(date +$datum)
-                            date=${date::-6} #delete last 3 chars
-                        else
-                            datum=${datum::-6} #format $datum
-
-                            if [ "$date" == "$datum" ]
-                            then
-                                num=$((num + 1))
-                            else
-                                echo "$date: $num"
-                                num=$((1))
-
-                                date=$(date +$datum)
-                            fi 
-                        fi
-                    fi    
-                
-                elif [ "$1" == "-g" ] # gender
-                then
-                    if [ "$pohlavi" == "$2" ]
-                    then
-                        if [ "$date" == "" ]
-                        then
-                            date=$(date +$datum)
-                            date=${date::-6} #delete last 3 chars
-                        else
-                            datum=${datum::-6} #format $datum
-
-                            if [ "$date" == "$datum" ]
-                            then
-                                num=$((num + 1))
-                            else
-                                echo "$date: $num"
-                                num=$((1))
-
-                                date=$(date +$datum)
-                            fi 
-                        fi
-                    fi 
-                else       
-                    if [ "$date" == "" ]
-                    then
-                        date=$(date +$datum)
-                        date=${date::-6} #delete last 3 chars
-                    else
-                        datum=${datum::-6} #format $datum
-
-                        if [ "$date" == "$datum" ]
-                        then
-                            num=$((num + 1))
-                        else
-                            echo "$date: $num"
-                            num=$((1))
-
-                            date=$(date +$datum)
-                        fi 
-                    fi
-                fi             
-            fi
+        if [ "$tmp_return_filter_a" == "1" ]; then
+            count_years $datum
+        elif [ "$tmp_return_filter_b" == "1" ]; then
+            count_years $datum
+        elif [ "$tmp_return_filter_g" == "1" ]; then
+            count_years $datum
+        elif [ "$actual_line" != "1" ]; then
+            count_years $datum
+        fi    
     done < osoby.csv
 
-    echo "$date: $num"
+    echo "$yearly_date: $yearly_count"
 }
 
 ################################################
@@ -673,13 +391,11 @@ get_yearly()
 export POSIXLY_CORRECT=yes
 
 # Help (in this case just print help text and end program)
-if  [ "$1" = "-h" ] 
-then
+if  [ "$1" = "-h" ] ; then
     help
 
 # Write infected people
-elif [ "$1" = "infected" ] || [ "$3" == "infected" ]
-then 
+elif [ "$1" = "infected" ] || [ "$3" == "infected" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "infected" ] # Filter is set
     then
         get_num "$1" "$2"   
@@ -688,8 +404,7 @@ then
     fi    
 
 # Write gender of infected people 
-elif [ "$1" = "gender" ] || [ "$3" == "gender" ]
-then 
+elif [ "$1" = "gender" ] || [ "$3" == "gender" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "gender" ] # Filter is set
     then
         get_gender "$1" "$2"   
@@ -698,8 +413,7 @@ then
     fi   
 
 # Write age of infected people 
-elif [ "$1" = "age" ] || [ "$3" == "age" ]
-then 
+elif [ "$1" = "age" ] || [ "$3" == "age" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "age" ] # Filter is set
     then
         get_age "$1" "$2"   
@@ -708,8 +422,7 @@ then
     fi
 
 # Write infected people sorted by days
-elif [ "$1" = "daily" ] || [ "$3" == "daily" ]
-then 
+elif [ "$1" = "daily" ] || [ "$3" == "daily" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "daily" ] # Filter is set
     then
         get_daily "$1" "$2"   
@@ -718,8 +431,7 @@ then
     fi
 
 # Write infected people sorted by months
-elif [ "$1" = "monthly" ] || [ "$3" == "monthly" ]
-then 
+elif [ "$1" = "monthly" ] || [ "$3" == "monthly" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "monthly" ] # Filter is set
     then
         get_monthly "$1" "$2"   
@@ -728,14 +440,16 @@ then
     fi
 
 # Write infected people sorted by years
-elif [ "$1" = "yearly" ] || [ "$3" == "yearly" ]
-then 
+elif [ "$1" = "yearly" ] || [ "$3" == "yearly" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "yearly" ] # Filter is set
     then
         get_yearly "$1" "$2"   
     else
         get_yearly "x"
     fi
+
+# todo: Wait for stdin
+# elif [ "$1" = "" ]
 
 # No command
 else
