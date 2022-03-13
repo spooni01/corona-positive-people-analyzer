@@ -13,8 +13,11 @@ genders=( 0 0 0 ) # man, woman, none
 
 #set filters
 var_filter_a=0
+var_filter_a_value=""
 var_filter_b=0
+var_filter_b_value=""
 var_filter_g=0
+var_filter_g_value=""
 
 #variables
 declare -i count=1
@@ -159,23 +162,26 @@ send_data_by_date_type() {
 sort_type_of_filter() {
     if [ "$1" == "-a" ]; then
        var_filter_a=$2
+       var_filter_a_value=$3
     elif [ "$1" == "-b" ]; then
        var_filter_b=$2
+       var_filter_b_value=$3
     elif [ "$1" == "-g" ]; then
-       var_filter_b=$2
+       var_filter_g=$2
+       var_filter_g_value=$3
     fi   
 }
 
 # Save filters
 save_filters() {
     if [ "$1" == "-a" ] || [ "$1" == "-b" ] || [ "$1" == "-g" ]; then
-        sort_type_of_filter "$1" "1"
+        sort_type_of_filter "$1" "1" "$4"
     fi
-    if [ "$2" == "-a" ] || [ "$2" == "-b" ] || [ "$3" == "-g" ]; then
-        sort_type_of_filter "$2" "3"
+    if [ "$2" == "-a" ] || [ "$2" == "-b" ] || [ "$2" == "-g" ]; then
+        sort_type_of_filter "$2" "3" "$5"
     fi
-    if [ "$3" == "-a" ] || [ "$3" == "-b" ] || [ "$5" == "-g" ]; then
-        sort_type_of_filter "$3" "5"
+    if [ "$5" == "-a" ] || [ "$5" == "-b" ] || [ "$5" == "-g" ]; then
+        sort_type_of_filter "$3" "5"  "$6"
     fi
 }
 
@@ -238,6 +244,28 @@ help() {
     printf "${RED}"
     echo "--------------------------------------------------"
     printf "${NOCOLOR}"
+}
+
+# Return 1 if person go throught all set filters
+do_filters() {
+    if [ "$var_filter_b" != 0 ] && [[ "$var_filter_b_value" > "$datum" ]] && [ "$var_filter_g" != 0 ] && [ "$var_filter_g_value" == "$pohlavi" ]; then
+        # Set -b and -g
+        echo "1"
+    elif [ "$var_filter_a" != 0 ] && [[ "$var_filter_a_value" < "$datum" ]] && [ "$var_filter_g" != 0 ] && [ "$var_filter_g_value" == "$pohlavi" ]; then
+        # Set -a and -g
+        echo "1"
+    elif [ "$var_filter_g" == 0 ]; then # must be, because it can jump here from second if
+        if [ "$var_filter_a" != 0 ] && [[ "$var_filter_a_value" < "$datum" ]]; then
+            # Set just -a
+            echo "1"
+        elif [ "$var_filter_b" != 0 ] && [[ "$var_filter_b_value" > "$datum" ]] && [ "$var_filter_g_value" != "$pohlavi" ]; then
+            # Set just -b
+            echo "1"   
+        fi     
+    elif [ "$var_filter_g" != 0 ] && [ "$var_filter_g_value" == "$pohlavi" ]; then
+        # Set just -g
+        echo "1"  
+    fi
 }
 
 # Print number of persons in table by filter. If input is get_num "x",
@@ -377,23 +405,37 @@ if  [ "$1" = "-h" ] ; then
     help
 else
     # Save filters
-    save_filters "$1" "$3" "$5"
+    save_filters "$1" "$3" "$5" "$2" "$4" "$6"
     save_sheet_name_and_command "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "$10" "$11" "$12"
 
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
     do
+        tmp=`do_filters`
+
         if [ "$command" == "infected" ]; then
-            echo "infected"
+            if [ "$tmp" == 1 ]; then
+                echo "ok" #todo: count it 
+            fi    
         elif [ "$command" == "gender" ]; then
-            echo "gender"   
+            if [ "$tmp" == 1 ]; then
+                echo "ok"
+            fi    
         elif [ "$command" == "age" ]; then
-            echo "age"   
+            if [ "$tmp" == 1 ]; then
+                echo "ok"
+            fi    
         elif [ "$command" == "daily" ]; then
-            echo "daily"    
+            if [ "$tmp" == 1 ]; then
+                echo "ok"
+            fi   
         elif [ "$command" == "monthly" ]; then
-            echo "monthly"    
+            if [ "$tmp" == 1 ]; then
+                echo "ok"
+            fi   
         elif [ "$command" == "yearly" ]; then
-            echo "yearly"    
+            if [ "$tmp" == 1 ]; then
+                echo "ok"
+            fi     
         fi
     done < $sheet_name
 fi
