@@ -12,12 +12,8 @@ ages=( 0 0 0 0 0 0 0 0 0 0 0 0 ) # store ages of people
 genders=( 0 0 0 ) # man, woman, none
 
 #variables
-declare -i daily_count=1
-declare -i monthly_count=1
-declare -i yearly_count=1
-daily_date=""
-monthly_date=""
-yearly_date=""
+declare -i count=1
+date=""
 
 #colors
 RED="\033[0;31m"
@@ -126,53 +122,63 @@ add_one_to_gender() {
 
 # Count dates and compare them
 count_days() {
-    if [ "$daily_date" == "" ]; then
-        daily_date=$(date +$1)
+    if [ "$date" == "" ]; then
+        date=$(date +$1)
     fi
 
-    if [ "$daily_date" == "$1" ]; then
-        daily_count=$((daily_count + 1))
+    if [ "$date" == "$1" ]; then
+        count=$((count + 1))
     else
-        echo "$daily_date: $daily_count"
-        daily_count=$((1))
-        daily_date=$(date +$1)
+        echo "$date: $count"
+        count=$((1))
+        date=$(date +$1)
     fi
 }
 count_months() {
-    if [ "$monthly_date" == "" ]; then
-        monthly_date=$(date +$1)
-        monthly_date=${monthly_date::-3} #delete last 3 chars
+    if [ "$date" == "" ]; then
+        date=$(date +$1)
+        date=${date::-3} #delete last 3 chars
     else
         tmp_date=$(date +$1)
         tmp_date=${tmp_date::-3} #format $tmp_date
 
-        if [ "$monthly_date" == "$tmp_date" ]; then
-            monthly_count=$((monthly_count + 1))
+        if [ "$date" == "$tmp_date" ]; then
+            count=$((count + 1))
         else
-            echo "$monthly_date: $monthly_count"    
-            monthly_count=$((1))
-            monthly_date=$(date +$tmp_date)
+            echo "$date: $count"    
+            count=$((1))
+            date=$(date +$tmp_date)
         fi 
     fi
 }
 count_years() {
-    if [ "$yearly_date" == "" ]; then
-        yearly_date=$(date +$1)
-        yearly_date=${yearly_date::-6} #delete last 6 chars
+    if [ "$date" == "" ]; then
+        date=$(date +$1)
+        date=${date::-6} #delete last 6 chars
     else
         tmp_date=$(date +$1)
         tmp_date=${tmp_date::-6} #format $tmp_date
 
-        if [ "$yearly_date" == "$tmp_date" ]; then
-            yearly_count=$((yearly_count + 1))
+        if [ "$date" == "$tmp_date" ]; then
+            count=$((count + 1))
         else
-            echo "$yearly_date: $yearly_count"    
-            yearly_count=$((1))
-            yearly_date=$(date +$tmp_date)
+            echo "$date: $count"    
+            count=$((1))
+            date=$(date +$tmp_date)
         fi 
     fi
 }
 
+# Send data by date type
+send_data_by_date_type() {
+    if [ "$1" == "daily" ]; then
+        count_days $2
+    elif [ "$1" == "monthly" ]; then    
+        count_months $2
+    elif [ "$1" == "yearly" ]; then    
+        count_years $2
+    fi     
+}
 
 ################################################
 ################# FUNCTIONS ####################
@@ -271,7 +277,6 @@ get_gender() {
     printf "None: ${genders[2]}\n" 
 }
 
-# Print number of persons sorted by their age. If input is get_gender "x",
 # return value is total number of all infected people sorted by age. 
 get_age() {
     declare -i actual_line=0    # This counter is for skipping first line
@@ -308,9 +313,9 @@ get_age() {
     printf  ">105:\t ${ages[11]}\n"
 }
 
-# Print number of persons in table by day filter. If input is get_num "x",
+# Print number of persons in table by days/months/years filter. If input is get_num "x",
 # return value is total number of all infected people. 
-get_daily() {
+get_date() {
     declare -i actual_line=0    # This counter is for skipping first line
 
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
@@ -321,67 +326,17 @@ get_daily() {
         tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
 
         if [ "$tmp_return_filter_a" == "1" ]; then
-            count_days $datum
+            send_data_by_date_type "$3" "$datum"   
         elif [ "$tmp_return_filter_b" == "1" ]; then
-            count_days $datum
+            send_data_by_date_type "$3" "$datum"
         elif [ "$tmp_return_filter_g" == "1" ]; then
-            count_days $datum
+            send_data_by_date_type "$3" "$datum"
         elif [ "$actual_line" != "1" ]; then
-            count_days $datum
-        fi    
-    done < osoby.csv
-}
-
-# Print number of persons in table by monthly filter. If input is get_num "x",
-# return value is total number of all infected people. 
-get_monthly() {
-    declare -i actual_line=0    # This counter is for skipping first line
-
-    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-    do
-        actual_line=$((actual_line + 1))
-        tmp_return_filter_a=`filter_a "$actual_line" "$1" "$datum" "$2"`    
-        tmp_return_filter_b=`filter_b "$actual_line" "$1" "$datum" "$2"`    
-        tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
-
-        if [ "$tmp_return_filter_a" == "1" ]; then
-            count_months $datum
-        elif [ "$tmp_return_filter_b" == "1" ]; then
-            count_months $datum
-        elif [ "$tmp_return_filter_g" == "1" ]; then
-            count_months $datum
-        elif [ "$actual_line" != "1" ]; then
-            count_months $datum
+            send_data_by_date_type "$3" "$datum"
         fi    
     done < osoby.csv
 
-    echo "$monthly_date: $monthly_count"
-}
-
-# Print number of persons in table by yearly filter. If input is get_num "x",
-# return value is total number of all infected people. 
-get_yearly() {
-    declare -i actual_line=0    # This counter is for skipping first line
-
-    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-    do
-        actual_line=$((actual_line + 1))
-        tmp_return_filter_a=`filter_a "$actual_line" "$1" "$datum" "$2"`    
-        tmp_return_filter_b=`filter_b "$actual_line" "$1" "$datum" "$2"`    
-        tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
-
-        if [ "$tmp_return_filter_a" == "1" ]; then
-            count_years $datum
-        elif [ "$tmp_return_filter_b" == "1" ]; then
-            count_years $datum
-        elif [ "$tmp_return_filter_g" == "1" ]; then
-            count_years $datum
-        elif [ "$actual_line" != "1" ]; then
-            count_years $datum
-        fi    
-    done < osoby.csv
-
-    echo "$yearly_date: $yearly_count"
+    echo "$date: $count" # Print last line
 }
 
 ################################################
@@ -425,27 +380,27 @@ elif [ "$1" = "age" ] || [ "$3" == "age" ]; then
 elif [ "$1" = "daily" ] || [ "$3" == "daily" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "daily" ] # Filter is set
     then
-        get_daily "$1" "$2"   
+        get_date "$1" "$2" "daily"
     else
-        get_daily "x"
+        get_date "x" "" "daily"
     fi
 
 # Write infected people sorted by months
 elif [ "$1" = "monthly" ] || [ "$3" == "monthly" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "monthly" ] # Filter is set
     then
-        get_monthly "$1" "$2"   
+        get_date "$1" "$2" "monthly"
     else
-        get_monthly "x"
+        get_date "x" "" "monthly"
     fi
 
 # Write infected people sorted by years
 elif [ "$1" = "yearly" ] || [ "$3" == "yearly" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "yearly" ] # Filter is set
     then
-        get_yearly "$1" "$2"   
+        get_date "$1" "$2" "yearly"
     else
-        get_yearly "x"
+        get_date "x" "" "yearly"
     fi
 
 # todo: Wait for stdin
