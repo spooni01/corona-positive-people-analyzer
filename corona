@@ -14,6 +14,7 @@ genders=( 0 0 0 ) # man, woman, none
 #variables
 declare -i count=1
 date=""
+sheet_name=daily.csv
 
 #colors
 RED="\033[0;31m"
@@ -302,7 +303,7 @@ get_date() {
         elif [ "$actual_line" != "1" ] && [ "$1" == "" ]; then
             send_data_by_date_type "$3" "$datum"
         fi    
-    done < osoby.csv
+    done < $sheet_name
 
     echo "$date: $count" # Print last line
 }
@@ -321,8 +322,10 @@ if  [ "$1" = "-h" ] ; then
 elif [ "$1" = "infected" ] || [ "$3" == "infected" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "infected" ] # Filter is set
     then
+        sheet_name=$4
         get_num "$1" "$2"   
     else
+        sheet_name=$2
         get_num ""
     fi    
 
@@ -330,8 +333,10 @@ elif [ "$1" = "infected" ] || [ "$3" == "infected" ]; then
 elif [ "$1" = "gender" ] || [ "$3" == "gender" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "gender" ] # Filter is set
     then
+        sheet_name=$4
         get_gender "$1" "$2"   
     else
+        sheet_name=$2
         get_gender ""
     fi   
 
@@ -339,8 +344,10 @@ elif [ "$1" = "gender" ] || [ "$3" == "gender" ]; then
 elif [ "$1" = "age" ] || [ "$3" == "age" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "age" ] # Filter is set
     then
+        sheet_name=$4
         get_age "$1" "$2"   
     else
+        sheet_name=$2
         get_age ""
     fi
 
@@ -348,8 +355,10 @@ elif [ "$1" = "age" ] || [ "$3" == "age" ]; then
 elif [ "$1" = "daily" ] || [ "$3" == "daily" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "daily" ] # Filter is set
     then
+        sheet_name=$4
         get_date "$1" "$2" "daily"
     else
+        sheet_name=$2
         get_date "" "" "daily"
     fi
 
@@ -357,8 +366,10 @@ elif [ "$1" = "daily" ] || [ "$3" == "daily" ]; then
 elif [ "$1" = "monthly" ] || [ "$3" == "monthly" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "monthly" ] # Filter is set
     then
+        sheet_name=$4
         get_date "$1" "$2" "monthly"
     else
+        sheet_name=$2
         get_date "" "" "monthly"
     fi
 
@@ -366,8 +377,10 @@ elif [ "$1" = "monthly" ] || [ "$3" == "monthly" ]; then
 elif [ "$1" = "yearly" ] || [ "$3" == "yearly" ]; then 
     if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "yearly" ] # Filter is set
     then
+        sheet_name=$4
         get_date "$1" "$2" "yearly"
     else
+        sheet_name=$2
         get_date "" "" "yearly"
     fi
 
