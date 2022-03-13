@@ -8,7 +8,7 @@
 ###############################################
 
 #arrays
-ages=( 0 0 0 0 0 0 0 0 0 0 0 0 ) # store ages of people
+ages=( 0 0 0 0 0 0 0 0 0 0 0 0 0 ) # store ages of people, last one is none
 genders=( 0 0 0 ) # man, woman, none
 
 #variables
@@ -51,7 +51,9 @@ filter_g() {
 
 # Functions will increase number in arrays
 add_one_to_ages() {
-    if [ "$1" -lt "6" ]; then
+    if [ "$1" == "" ]; then
+        (( ages[12]++ ))
+    elif [ "$1" -lt "6" ]; then
         (( ages[0]++ ))
     elif [ "$1" -lt  "16" ]; then
         (( ages[1]++ ))
@@ -73,7 +75,7 @@ add_one_to_ages() {
         (( ages[9]++ ))
     elif [ "$1" -lt  "106" ]; then
         (( ages[10]++ ))
-    else
+    elif [ "$1" != "" ]; then
         (( ages[11]++ ))
     fi 
 }
@@ -207,10 +209,10 @@ get_num() {
             num=$((num + 1))  
         elif [ "$tmp_return_filter_g" == "1" ]; then
             num=$((num + 1))  
-        elif [ "$1" == "" ]; then
+        elif [ "$1" == "" ] && [ "$actual_line" != "1" ]; then
             num=$((num + 1))  
         fi
-    done < osoby.csv
+    done < $sheet_name
 
     echo "$num"   
 }
@@ -234,10 +236,10 @@ get_gender() {
             add_one_to_gender $pohlavi
         elif [ "$tmp_return_filter_g" == "1" ]; then
             add_one_to_gender $pohlavi
-        elif [ "$1" == "" ]; then
+        elif [ "$1" == "" ] && [ "$actual_line" != "1" ]; then
             add_one_to_gender $pohlavi
         fi    
-    done < osoby.csv
+    done < $sheet_name
 
     printf "M: ${genders[0]}\n" 
     printf "Z: ${genders[1]}\n" 
@@ -259,14 +261,17 @@ get_age() {
 
         if [ "$tmp_return_filter_a" == "1" ]; then
             add_one_to_ages $vek
+            x=5
         elif [ "$tmp_return_filter_b" == "1" ]; then
             add_one_to_ages $vek
+            x=5
         elif [ "$tmp_return_filter_g" == "1" ]; then
             add_one_to_ages $vek
-        elif [ "$1" == "" ]; then
+            x=5
+        elif [ "$1" == "" ] && [ "$actual_line" != "1" ]; then
             add_one_to_ages $vek
         fi    
-    done < osoby.csv
+    done < $sheet_name
 
     printf  "0-5:\t ${ages[0]}\n" 
     printf  "6-15:\t ${ages[1]}\n"
@@ -280,6 +285,9 @@ get_age() {
     printf  "86-95:\t ${ages[9]}\n"
     printf  "96-105:\t ${ages[10]}\n"
     printf  ">105:\t ${ages[11]}\n"
+    if [ "${ages[12]}" != "0" ]; then
+        printf  "None:\t ${ages[12]}\n"
+    fi
 }
 
 # Print number of persons in table by days/months/years filter. If input is get_num "x",
@@ -300,7 +308,7 @@ get_date() {
             send_data_by_date_type "$3" "$datum"
         elif [ "$tmp_return_filter_g" == "1" ]; then
             send_data_by_date_type "$3" "$datum"
-        elif [ "$actual_line" != "1" ] && [ "$1" == "" ]; then
+        elif [ "$1" == "" ] && [ "$actual_line" != "1" ]; then
             send_data_by_date_type "$3" "$datum"
         fi    
     done < $sheet_name
