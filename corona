@@ -11,8 +11,14 @@
 ages=( 0 0 0 0 0 0 0 0 0 0 0 0 0 ) # store ages of people, last one is none
 genders=( 0 0 0 ) # man, woman, none
 
+#set filters
+var_filter_a=0
+var_filter_b=0
+var_filter_g=0
+
 #variables
 declare -i count=1
+command=""
 date=""
 sheet_name=daily.csv
 
@@ -147,6 +153,50 @@ send_data_by_date_type() {
     elif [ "$1" == "yearly" ]; then    
         count_years $2
     fi     
+}
+
+# Sort filter type. $1 is text from terminal, $2 is position.
+sort_type_of_filter() {
+    if [ "$1" == "-a" ]; then
+       var_filter_a=$2
+    elif [ "$1" == "-b" ]; then
+       var_filter_b=$2
+    elif [ "$1" == "-g" ]; then
+       var_filter_b=$2
+    fi   
+}
+
+# Save filters
+save_filters() {
+    if [ "$1" == "-a" ] || [ "$1" == "-b" ] || [ "$1" == "-g" ]; then
+        sort_type_of_filter "$1" "1"
+    fi
+    if [ "$2" == "-a" ] || [ "$2" == "-b" ] || [ "$3" == "-g" ]; then
+        sort_type_of_filter "$2" "3"
+    fi
+    if [ "$3" == "-a" ] || [ "$3" == "-b" ] || [ "$5" == "-g" ]; then
+        sort_type_of_filter "$3" "5"
+    fi
+}
+
+# Save sheet name
+save_sheet_name_and_command() {
+    if [ "$3" == "" ]; then
+        sheet_name=$2
+        command=$1
+    elif [ "$5" == "" ]; then
+        sheet_name=$4
+        command=$3
+    elif [ "$7" == "" ]; then
+        sheet_name=$6
+        command=$5
+    elif [ "$9" == "" ]; then
+        sheet_name=$8
+        command=$7
+    elif [ "$11" == "" ]; then
+        sheet_name=$10
+        command=$9
+    fi
 }
 
 ################################################
@@ -325,79 +375,27 @@ export POSIXLY_CORRECT=yes
 # Help (in this case just print help text and end program)
 if  [ "$1" = "-h" ] ; then
     help
-
-# Write infected people
-elif [ "$1" = "infected" ] || [ "$3" == "infected" ]; then 
-    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "infected" ] # Filter is set
-    then
-        sheet_name=$4
-        get_num "$1" "$2"   
-    else
-        sheet_name=$2
-        get_num ""
-    fi    
-
-# Write gender of infected people 
-elif [ "$1" = "gender" ] || [ "$3" == "gender" ]; then 
-    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "gender" ] # Filter is set
-    then
-        sheet_name=$4
-        get_gender "$1" "$2"   
-    else
-        sheet_name=$2
-        get_gender ""
-    fi   
-
-# Write age of infected people 
-elif [ "$1" = "age" ] || [ "$3" == "age" ]; then 
-    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "age" ] # Filter is set
-    then
-        sheet_name=$4
-        get_age "$1" "$2"   
-    else
-        sheet_name=$2
-        get_age ""
-    fi
-
-# Write infected people sorted by days
-elif [ "$1" = "daily" ] || [ "$3" == "daily" ]; then 
-    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "daily" ] # Filter is set
-    then
-        sheet_name=$4
-        get_date "$1" "$2" "daily"
-    else
-        sheet_name=$2
-        get_date "" "" "daily"
-    fi
-
-# Write infected people sorted by months
-elif [ "$1" = "monthly" ] || [ "$3" == "monthly" ]; then 
-    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "monthly" ] # Filter is set
-    then
-        sheet_name=$4
-        get_date "$1" "$2" "monthly"
-    else
-        sheet_name=$2
-        get_date "" "" "monthly"
-    fi
-
-# Write infected people sorted by years
-elif [ "$1" = "yearly" ] || [ "$3" == "yearly" ]; then 
-    if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" = "yearly" ] # Filter is set
-    then
-        sheet_name=$4
-        get_date "$1" "$2" "yearly"
-    else
-        sheet_name=$2
-        get_date "" "" "yearly"
-    fi
-
-# todo: Wait for stdin
-# elif [ "$1" = "" ]
-
-# No command
 else
-    printf "Bol zadany nespravny tvar prikazu, pre napovedu napis ${RED}corona -h${NOCOLOR}\n"
+    # Save filters
+    save_filters "$1" "$3" "$5"
+    save_sheet_name_and_command "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "$10" "$11" "$12"
+
+    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
+    do
+        if [ "$command" == "infected" ]; then
+            echo "infected"
+        elif [ "$command" == "gender" ]; then
+            echo "gender"   
+        elif [ "$command" == "age" ]; then
+            echo "age"   
+        elif [ "$command" == "daily" ]; then
+            echo "daily"    
+        elif [ "$command" == "monthly" ]; then
+            echo "monthly"    
+        elif [ "$command" == "yearly" ]; then
+            echo "yearly"    
+        fi
+    done < $sheet_name
 fi
 
 exit 0
