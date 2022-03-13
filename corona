@@ -24,46 +24,25 @@ NOCOLOR="\033[0m"
 ################################################
 
 filter_a() { 
-    if [ "$1" != "1" ]
-    then
-        if [ "$2" == "-a" ] # data after date
-        then
-            if [[ "$3" > "$4" ]]
-            then
-                echo "1"
-                return
-            fi
-        fi
+    if [ "$1" != "1" ] && [ "$2" == "-a" ] && [[ "$3" > "$4" ]]; then
+        echo "1"
+        return
     fi
 
-    echo "0"
+    echo "0" 
 }
 filter_b() { 
-    if [ "$1" != "1" ]
-    then
-        if [ "$2" == "-a" ] # data after date
-        then
-            if [[ "$3" < "$4" ]]
-            then
-                echo "1"
-                return
-            fi
-        fi
+    if [ "$1" != "1" ] && [ "$2" == "-b" ] && [[ "$3" < "$4" ]]; then
+        echo "1"
+        return
     fi
 
     echo "0"
 }
 filter_g() {
-    if [ "$1" != "1" ]
-    then
-        if [ "$2" == "-g" ] # data after date
-        then
-            if [[ "$3" == "$4" ]]
-            then
-                echo "1"
-                return
-            fi
-        fi
+    if [ "$1" != "1" ] && [ "$2" == "-g" ] && [[ "$3" == "$4" ]]; then
+        echo "1"
+        return
     fi
 
     echo "0"   
@@ -71,49 +50,36 @@ filter_g() {
 
 # Functions will increase number in arrays
 add_one_to_ages() {
-    if [ "$1" -lt "6" ]
-    then
+    if [ "$1" -lt "6" ]; then
         (( ages[0]++ ))
-    elif [ "$1" -lt  "16" ]
-    then
+    elif [ "$1" -lt  "16" ]; then
         (( ages[1]++ ))
-    elif [ "$1" -lt  "26" ]
-    then
+    elif [ "$1" -lt  "26" ]; then
         (( ages[2]++ ))
-    elif [ "$1" -lt  "36" ]
-    then
+    elif [ "$1" -lt  "36" ]; then
         (( ages[3]++ ))
-    elif [ "$1" -lt  "46" ]
-    then
+    elif [ "$1" -lt  "46" ]; then
         (( ages[4]++ ))
-    elif [ "$1" -lt  "56" ]
-    then
+    elif [ "$1" -lt  "56" ]; then
         (( ages[5]++ ))
-    elif [ "$1" -lt  "66" ]
-    then
+    elif [ "$1" -lt  "66" ]; then
         (( ages[6]++ ))
-    elif [ "$1" -lt  "76" ]
-    then
+    elif [ "$1" -lt  "76" ]; then
         (( ages[7]++ ))
-    elif [ "$1" -lt  "86" ]
-    then
+    elif [ "$1" -lt  "86" ]; then
         (( ages[8]++ ))
-    elif [ "$1" -lt  "96" ]
-    then
+    elif [ "$1" -lt  "96" ]; then
         (( ages[9]++ ))
-    elif [ "$1" -lt  "106" ]
-    then
+    elif [ "$1" -lt  "106" ]; then
         (( ages[10]++ ))
     else
         (( ages[11]++ ))
     fi 
 }
 add_one_to_gender() {
-    if [ "$1" == "M" ] 
-    then
+    if [ "$1" == "M" ]; then
         (( genders[0]++ ))
-    elif [ "$1" == "Z" ]
-    then
+    elif [ "$1" == "Z" ]; then
         (( genders[1]++ ))
     else 
         (( genders[2]++ ))    
@@ -240,7 +206,7 @@ get_num() {
             num=$((num + 1))  
         elif [ "$tmp_return_filter_g" == "1" ]; then
             num=$((num + 1))  
-        else
+        elif [ "$1" == "" ]; then
             num=$((num + 1))  
         fi
     done < osoby.csv
@@ -267,14 +233,16 @@ get_gender() {
             add_one_to_gender $pohlavi
         elif [ "$tmp_return_filter_g" == "1" ]; then
             add_one_to_gender $pohlavi
-        else
+        elif [ "$1" == "" ]; then
             add_one_to_gender $pohlavi
         fi    
     done < osoby.csv
 
     printf "M: ${genders[0]}\n" 
     printf "Z: ${genders[1]}\n" 
-    printf "None: ${genders[2]}\n" 
+    if [ "${genders[2]}" != "0" ]; then
+        printf "None: ${genders[2]}\n" 
+    fi
 }
 
 # return value is total number of all infected people sorted by age. 
@@ -294,7 +262,7 @@ get_age() {
             add_one_to_ages $vek
         elif [ "$tmp_return_filter_g" == "1" ]; then
             add_one_to_ages $vek
-        else
+        elif [ "$1" == "" ]; then
             add_one_to_ages $vek
         fi    
     done < osoby.csv
@@ -331,7 +299,7 @@ get_date() {
             send_data_by_date_type "$3" "$datum"
         elif [ "$tmp_return_filter_g" == "1" ]; then
             send_data_by_date_type "$3" "$datum"
-        elif [ "$actual_line" != "1" ]; then
+        elif [ "$actual_line" != "1" ] && [ "$1" == "" ]; then
             send_data_by_date_type "$3" "$datum"
         fi    
     done < osoby.csv
@@ -355,7 +323,7 @@ elif [ "$1" = "infected" ] || [ "$3" == "infected" ]; then
     then
         get_num "$1" "$2"   
     else
-        get_num "x"
+        get_num ""
     fi    
 
 # Write gender of infected people 
@@ -364,7 +332,7 @@ elif [ "$1" = "gender" ] || [ "$3" == "gender" ]; then
     then
         get_gender "$1" "$2"   
     else
-        get_gender "x"
+        get_gender ""
     fi   
 
 # Write age of infected people 
@@ -373,7 +341,7 @@ elif [ "$1" = "age" ] || [ "$3" == "age" ]; then
     then
         get_age "$1" "$2"   
     else
-        get_age "x"
+        get_age ""
     fi
 
 # Write infected people sorted by days
@@ -382,7 +350,7 @@ elif [ "$1" = "daily" ] || [ "$3" == "daily" ]; then
     then
         get_date "$1" "$2" "daily"
     else
-        get_date "x" "" "daily"
+        get_date "" "" "daily"
     fi
 
 # Write infected people sorted by months
@@ -391,7 +359,7 @@ elif [ "$1" = "monthly" ] || [ "$3" == "monthly" ]; then
     then
         get_date "$1" "$2" "monthly"
     else
-        get_date "x" "" "monthly"
+        get_date "" "" "monthly"
     fi
 
 # Write infected people sorted by years
@@ -400,7 +368,7 @@ elif [ "$1" = "yearly" ] || [ "$3" == "yearly" ]; then
     then
         get_date "$1" "$2" "yearly"
     else
-        get_date "x" "" "yearly"
+        get_date "" "" "yearly"
     fi
 
 # todo: Wait for stdin
