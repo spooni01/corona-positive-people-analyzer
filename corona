@@ -11,10 +11,10 @@ ages=( 0 0 0 0 0 0 0 0 0 0 0 0 0 ) # store ages of people, last one is none
 genders=( 0 0 0 ) # man, woman, none
 countries=( "AF" "AX" "AL" "DZ" "AS" "VI" "AD" "AO" "AI" "AQ" "AG" "AR" "AM" "AW" "AU" "AZ" "BS" "BH" "BD" "BB" "BE" "BZ" "BY" "BJ" "BM" "BT" "BO" "BQ" "BA" "BW" "BV" "BR" "IO" "VG" "BN" "BG" "BF" "BI" "CK" "CW" "TD" "ME" "CZ" "CN" "DK" "DM" "DO" "DJ" "EG" "EC" "ER" "EE" "ET" "FO" "FK" "FJ" "PH" "FI" "FR" "GF" "TF" "PF" "GA" "GM" "GH" "GI" "GD" "GL" "GE" "GP" "GU" "GT" "GG" "GN" "GW" "GY" "HT" "HM" "HN" "HK" "CL" "HR" "IN" "ID" "IQ" "IR" "IE" "IS" "IT" "IL" "JM" "JP" "YE" "JE" "ZA" "GS" "SS" "JO" "KY" "KH" "CM" "CA" "CV" "QA" "KZ" "KE" "KI" "CC" "CO" "KM" "CD" "CG" "KP" "KR" "XK" "CR" "CU" "KW" "CY" "KG" "LA" "LS" "LB" "LR" "LY" "LI" "LT" "LV" "LU" "MO" "MG" "HU" "MY" "MW" "MV" "ML" "MT" "IM" "MA" "MH" "MQ" "MU" "MR" "YT" "UM" "MX" "FM" "MD" "MC" "MN" "MS" "MZ" "MM" "NA" "NR" "DE" "NP" "NE" "NG" "NI" "NU" "NL" "NF" "NO" "NC" "NZ" "OM" "PK" "PW" "PS" "PA" "PG" "PY" "PE" "PN" "CI" "PL" "PR" "PT" "AT" "RE" "GQ" "RO" "RU" "RW" "GR" "PM" "SV" "WS" "SM" "SA" "SN" "MK" "MP" "SC" "SL" "SG" "SK" "SI" "SO" "AE" "US" "RS" "CF" "SD" "SR" "SH" "LC" "BL" "KN" "MF" "SX" "ST" "VC" "SZ" "SY" "SB" "ES" "SJ" "LK" "SE" "CH" "TJ" "TZ" "TH" "TW" "TG" "TK" "TO" "TT" "TN" "TR" "TM" "TC" "TV" "UG" "UA" "UY" "UZ" "CX" "VU" "VA" "GB" "VE" "VN" "TL" "WF" "ZM" "EH" "ZW" )
 countries_num=( 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 )
-districts=( "CZ0201" "CZ0202" "CZ0641" "CZ0642" "CZ0643" "CZ0801" "CZ0644" "CZ0411" "CZ0422" "CZ0531" "CZ0511" "CZ0311" "CZ0312" "CZ0421" "CZ0321" "CZ0802" "CZ0631" "CZ0100" "CZ0645" "CZ0521" "CZ0512" "CZ0711" "CZ0522" "CZ0632" "CZ0313" "CZ0412" "CZ0803" "CZ0203" "CZ0322" "CZ0204" "CZ0721" "CZ0205" "CZ0513" "CZ0423" "CZ0424" "CZ0206" "CZ0207" "CZ0425" "CZ0523" "CZ0804" "CZ0208" "CZ0712" "CZ0805" "CZ0806" "CZ0532" "CZ0633" "CZ0314" "CZ0324" "CZ0323" "CZ0325" "CZ0315" "CZ0209" "CZ020A" "CZ0713" "CZ0714" "CZ020B" "CZ020C" "CZ0326" "CZ0524" "CZ0514" "CZ0413" "CZ0316" "CZ0533" "CZ0715" "CZ0317" "CZ0327" "CZ0426" "CZ0525" "CZ0634" "CZ0722" "CZ0427" "CZ0534" "CZ0723" "CZ0646" "CZ0724" "CZ0647" "CZ0635" )
-districts_num=( 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 )
-regions=( "CZ010" "CZ020" "CZ031" "CZ032" "CZ041" "CZ042" "CZ051" "CZ052" "CZ053" "CZ063" "CZ064" "CZ071" "CZ072" "CZ080" )
-regions_num=( 0 0 0 0 0 0 0 0 0 0 0 0 0 0 )
+districts=( "CZ0201" "CZ0202" "CZ0641" "CZ0642" "CZ0643" "CZ0801" "CZ0644" "CZ0411" "CZ0422" "CZ0531" "CZ0511" "CZ0311" "CZ0312" "CZ0421" "CZ0321" "CZ0802" "CZ0631" "CZ0100" "CZ0645" "CZ0521" "CZ0512" "CZ0711" "CZ0522" "CZ0632" "CZ0313" "CZ0412" "CZ0803" "CZ0203" "CZ0322" "CZ0204" "CZ0721" "CZ0205" "CZ0513" "CZ0423" "CZ0424" "CZ0206" "CZ0207" "CZ0425" "CZ0523" "CZ0804" "CZ0208" "CZ0712" "CZ0805" "CZ0806" "CZ0532" "CZ0633" "CZ0314" "CZ0324" "CZ0323" "CZ0325" "CZ0315" "CZ0209" "CZ020A" "CZ0713" "CZ0714" "CZ020B" "CZ020C" "CZ0326" "CZ0524" "CZ0514" "CZ0413" "CZ0316" "CZ0533" "CZ0715" "CZ0317" "CZ0327" "CZ0426" "CZ0525" "CZ0634" "CZ0722" "CZ0427" "CZ0534" "CZ0723" "CZ0646" "CZ0724" "CZ0647" "CZ0635" "None" )
+districts_num=( 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 )
+regions=( "CZ010" "CZ020" "CZ031" "CZ032" "CZ041" "CZ042" "CZ051" "CZ052" "CZ053" "CZ063" "CZ064" "CZ071" "CZ072" "CZ080" "None" )
+regions_num=( 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 )
 
 var_filter_a=0
 var_filter_a_value=""
@@ -82,6 +82,7 @@ add_one_to_country() {
 
             if [ "$i" == "${1}" ]; then
                 (( countries_num[$tmp_counter]++ ))
+                return
             fi
         done 
     fi    
@@ -94,8 +95,11 @@ add_one_to_districts() {
 
             if [ "$i" == "${1}" ]; then
                 (( districts_num[$tmp_counter]++ ))
+                return
             fi
         done 
+    else
+        (( districts_num[77]++ ))
     fi    
 }
 add_one_to_regions() {
@@ -106,8 +110,11 @@ add_one_to_regions() {
 
             if [ "$i" == "${1}" ]; then
                 (( regions_num[$tmp_counter]++ ))
+                return
             fi
         done 
+    else
+        (( regions_num[14]++ ))
     fi    
 }
 
@@ -189,7 +196,9 @@ save_filters() {
 
 # Save sheet name
 save_sheet_name_and_command() {
-    if [ "$3" == "" ]; then
+    if [ "$2" == "" ]; then
+        sheet_name=$1    
+    elif [ "$3" == "" ]; then
         sheet_name=$2
         command=$1
     elif [ "$5" == "" ]; then
@@ -286,40 +295,40 @@ print_genders() {
     fi
 }
 print_age() {
-    printf  "0-5:\t ${ages[0]}\n" 
-    printf  "6-15:\t ${ages[1]}\n"
-    printf  "16-25:\t ${ages[2]}\n"
-    printf  "26-35:\t ${ages[3]}\n"
-    printf  "36-45:\t ${ages[4]}\n"
-    printf  "46-55:\t ${ages[5]}\n"
-    printf  "56-65:\t ${ages[6]}\n"
-    printf  "66-75:\t ${ages[7]}\n"
-    printf  "76-85:\t ${ages[8]}\n"
-    printf  "86-95:\t ${ages[9]}\n"
-    printf  "96-105:\t ${ages[10]}\n"
-    printf  ">105:\t ${ages[11]}\n"
+    printf  "0-5   : ${ages[0]}\n" 
+    printf  "6-15  : ${ages[1]}\n"
+    printf  "16-25 : ${ages[2]}\n"
+    printf  "26-35 : ${ages[3]}\n"
+    printf  "36-45 : ${ages[4]}\n"
+    printf  "46-55 : ${ages[5]}\n"
+    printf  "56-65 : ${ages[6]}\n"
+    printf  "66-75 : ${ages[7]}\n"
+    printf  "76-85 : ${ages[8]}\n"
+    printf  "86-95 : ${ages[9]}\n"
+    printf  "96-105: ${ages[10]}\n"
+    printf  ">105  : ${ages[11]}\n"
     if [ "${ages[12]}" != "0" ]; then
-        printf  "None:\t ${ages[12]}\n"
+        printf  "None  : ${ages[12]}\n"
     fi
 }
 print_countries() {
     for i in "${!countries[@]}"; do
-        if [ "${countries_num[$i]}" != "0" ]; then
-            printf  "${countries[$i]}:\t ${countries_num[$i]}\n"
+        if [ "${countries_num[$i]}" != "0" ] && [ "${countries[$i]}" != "CZ" ]; then
+            printf  "${countries[$i]}: ${countries_num[$i]}\n"
         fi
     done 
 }
 print_districts() {
     for i in "${!districts[@]}"; do
         if [ "${districts_num[$i]}" != "0" ]; then
-            printf  "${districts[$i]}:\t ${districts_num[$i]}\n"
+            printf  "${districts[$i]}: ${districts_num[$i]}\n"
         fi
     done 
 }
 print_regions() {
     for i in "${!regions[@]}"; do
         if [ "${regions_num[$i]}" != "0" ]; then
-            printf  "${regions[$i]}:\t ${regions_num[$i]}\n"
+            printf  "${regions[$i]}: ${regions_num[$i]}\n"
         fi
     done 
 }
@@ -378,7 +387,9 @@ else
             elif [ "$command" == "districts" ]; then
                 add_one_to_districts "$okres_lau_kod"  
             elif [ "$command" == "regions" ]; then
-                add_one_to_regions "$kraj_nuts_kod"    
+                add_one_to_regions "$kraj_nuts_kod"   
+            else
+                printf "$id,$datum,$vek,$pohlavi,$kraj_nuts_kod,$okres_lau_kod,$nakaza_v_zahranici,$nakaza_zeme_csu_kod,$reportovano_khs\n"  
             fi
         fi    
     done < $sheet_name
