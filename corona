@@ -15,6 +15,9 @@ districts=( "CZ0201" "CZ0202" "CZ0641" "CZ0642" "CZ0643" "CZ0801" "CZ0644" "CZ04
 districts_num=( 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 )
 regions=( "CZ010" "CZ020" "CZ031" "CZ032" "CZ041" "CZ042" "CZ051" "CZ052" "CZ053" "CZ063" "CZ064" "CZ071" "CZ072" "CZ080" "None" )
 regions_num=( 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 )
+err_msg=( "" "date:" "age: " "gender: ")
+err_code=0
+err_num=0
 
 var_filter_a=0
 var_filter_a_value=""
@@ -170,14 +173,26 @@ count_years() {
 # Sort filter type. $1 is text from terminal, $2 is position.
 sort_type_of_filter() {
     if [ "$1" == "-a" ]; then
-       var_filter_a=$2
-       var_filter_a_value=$3
+        if [[ $3 == [0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] ]];then
+            var_filter_a=$2
+            var_filter_a_value=$3
+        else
+            >&2 echo "${err_msg[1]}"
+        fi    
     elif [ "$1" == "-b" ]; then
-       var_filter_b=$2
-       var_filter_b_value=$3
+        if [[ $3 == [0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] ]];then
+            var_filter_a=$2
+            var_filter_a_value=$3
+        else
+            >&2 echo "${err_msg[1]}"
+        fi   
     elif [ "$1" == "-g" ]; then
-       var_filter_g=$2
-       var_filter_g_value=$3
+        if [[ $3 == [0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] ]];then
+            var_filter_a=$2
+            var_filter_a_value=$3
+        else
+            >&2 echo "${err_msg[1]}"
+        fi   
     fi   
 }
 
@@ -255,6 +270,17 @@ help() {
     printf "${RED}"
     echo "--------------------------------------------------"
     printf "${NOCOLOR}"
+}
+
+# Check if line data are valid, if not, write error
+check_data_validity() {
+    if [[ $1 != [0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] ]];then
+        err_code=1
+    elif [[ $2 != [0-1][0-9][0-9] ]] && [[ $2 != [0-9][0-9] ]] && [[ $2 != [0-9] ]]; then
+        err_code=2
+    elif [[ $3 != "M" ]] && [[ $3 != "Z" ]] && [[ $3 != "" ]]; then
+        err_code=3
+    fi
 }
 
 # Return 1 if person go throught all set filters
@@ -366,10 +392,11 @@ else
 
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
     do
+        check_data_validity "$datum" "$vek" "$pohlavi" "$kraj_nuts_kod" "$okres_lau_kod" "$nakaza_v_zahranici" "$nakaza_zeme_csu_kod" "$nakaza_v_zahranici" "$reportovano_khs"
         actual_line=$((actual_line + 1))
         tmp_filter=`do_filters`
 
-        if [ "$actual_line" != "1" ] && [ "$tmp_filter" == "1" ]; then
+        if [ "$actual_line" != "1" ] && [ "$tmp_filter" == "1" ] && [ "$err_code" == 0 ]; then
             if [ "$command" == "infected" ]; then
                 add_one_to_gender "$pohlavi"
             elif [ "$command" == "gender" ]; then
@@ -391,10 +418,19 @@ else
             else
                 printf "$id,$datum,$vek,$pohlavi,$kraj_nuts_kod,$okres_lau_kod,$nakaza_v_zahranici,$nakaza_zeme_csu_kod,$reportovano_khs\n"  
             fi
+        elif [ "$actual_line" != "1" ] && [ "$err_code" != 0 ]; then
+            >&2 echo "Invalid ${err_msg[$err_code]} $id,$datum,$vek,$pohlavi,$kraj_nuts_kod,$okres_lau_kod,$nakaza_v_zahranici,$nakaza_zeme_csu_kod,$reportovano_khs"    
+            (( err_num++ ))
         fi    
+
+        err_code=0
     done < $sheet_name
 
     print_results 
 fi
 
-exit 0
+if [ err_num != 0 ]; then
+    exit 1
+else
+    exit 0
+fi
