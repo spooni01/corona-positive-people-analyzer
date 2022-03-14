@@ -7,11 +7,10 @@
 #                                             #
 ###############################################
 
-#arrays
+#arrays and filters
 ages=( 0 0 0 0 0 0 0 0 0 0 0 0 0 ) # store ages of people, last one is none
 genders=( 0 0 0 ) # man, woman, none
 
-#set filters
 var_filter_a=0
 var_filter_a_value=""
 var_filter_b=0
@@ -20,10 +19,10 @@ var_filter_g=0
 var_filter_g_value=""
 
 #variables
-declare -i count=1
+count=1
 command=""
 date=""
-sheet_name=daily.csv
+sheet_name=osoby.csv
 
 #colors
 RED="\033[0;31m"
@@ -32,31 +31,6 @@ NOCOLOR="\033[0m"
 ################################################
 ############### HELP FUNCTIONS #################
 ################################################
-
-filter_a() { 
-    if [ "$1" != "1" ] && [ "$2" == "-a" ] && [[ "$3" > "$4" ]]; then
-        echo "1"
-        return
-    fi
-
-    echo "0" 
-}
-filter_b() { 
-    if [ "$1" != "1" ] && [ "$2" == "-b" ] && [[ "$3" < "$4" ]]; then
-        echo "1"
-        return
-    fi
-
-    echo "0"
-}
-filter_g() {
-    if [ "$1" != "1" ] && [ "$2" == "-g" ] && [[ "$3" == "$4" ]]; then
-        echo "1"
-        return
-    fi
-
-    echo "0"   
-}
 
 # Functions will increase number in arrays
 add_one_to_ages() {
@@ -145,17 +119,6 @@ count_years() {
             date=$(date +$tmp_date)
         fi 
     fi
-}
-
-# Send data by date type
-send_data_by_date_type() {
-    if [ "$1" == "daily" ]; then
-        count_days $2
-    elif [ "$1" == "monthly" ]; then    
-        count_months $2
-    elif [ "$1" == "yearly" ]; then    
-        count_years $2
-    fi     
 }
 
 # Sort filter type. $1 is text from terminal, $2 is position.
@@ -271,32 +234,6 @@ do_filters() {
     fi
 }
 
-# Print number of persons in table by days/months/years filter. If input is get_num "x",
-# return value is total number of all infected people. 
-get_date() {
-    declare -i actual_line=0    # This counter is for skipping first line
-
-    while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
-    do
-        actual_line=$((actual_line + 1))
-        tmp_return_filter_a=`filter_a "$actual_line" "$1" "$datum" "$2"`    
-        tmp_return_filter_b=`filter_b "$actual_line" "$1" "$datum" "$2"`    
-        tmp_return_filter_g=`filter_g "$actual_line" "$1" "$pohlavi" "$2"`    
-
-        if [ "$tmp_return_filter_a" == "1" ]; then
-            send_data_by_date_type "$3" "$datum"   
-        elif [ "$tmp_return_filter_b" == "1" ]; then
-            send_data_by_date_type "$3" "$datum"
-        elif [ "$tmp_return_filter_g" == "1" ]; then
-            send_data_by_date_type "$3" "$datum"
-        elif [ "$1" == "" ] && [ "$actual_line" != "1" ]; then
-            send_data_by_date_type "$3" "$datum"
-        fi    
-    done < $sheet_name
-
-    echo "$date: $count" # Print last line
-}
-
 # Print results
 print_infected() {
     total=$(( ${genders[0]} + ${genders[1]} + ${genders[2]} ))
@@ -326,6 +263,18 @@ print_age() {
         printf  "None:\t ${ages[12]}\n"
     fi
 }
+print_results() {
+    if [ "$command" == "infected" ]; then
+         print_infected
+    elif [ "$command" == "gender" ]; then
+        print_genders
+    elif [ "$command" == "age" ]; then
+        print_age
+    elif [ "$command" == "daily" ] ||  [ "$command" == "monthly" ] ||[ "$command" == "yearly" ]; then 
+        # Print just last line, other lines are printed when program is working
+        echo "$date: $count"
+    fi   
+}
 
 ################################################
 ################### MAIN #######################
@@ -333,57 +282,36 @@ print_age() {
 
 export POSIXLY_CORRECT=yes
 
-# Help (in this case just print help text and end program)
 if  [ "$1" = "-h" ] ; then
     help
 else
     actual_line=0
-    # Save filters
     save_filters "$1" "$3" "$5" "$2" "$4" "$6"
     save_sheet_name_and_command "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "$10" "$11" "$12"
 
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
     do
         actual_line=$((actual_line + 1))
-        tmp=`do_filters`
+        tmp_filter=`do_filters`
 
-        if [ "$actual_line" != "1" ]; then # Skip first line
+        if [ "$actual_line" != "1" ] && [ "$tmp_filter" == "1" ]; then
             if [ "$command" == "infected" ]; then
-                if [ "$tmp" == "1" ]; then
-                    add_one_to_gender "$pohlavi"
-                fi    
+                add_one_to_gender "$pohlavi"
             elif [ "$command" == "gender" ]; then
-                if [ "$tmp" == 1 ]; then
-                    add_one_to_gender "$pohlavi"
-                fi    
+                add_one_to_gender "$pohlavi"    
             elif [ "$command" == "age" ]; then
-                if [ "$tmp" == 1 ]; then
-                    add_one_to_ages "$vek"
-                fi    
+                add_one_to_ages "$vek"   
             elif [ "$command" == "daily" ]; then
-                if [ "$tmp" == 1 ]; then
-                    echo "ok"
-                fi   
+                count_days "$datum"     
             elif [ "$command" == "monthly" ]; then
-                if [ "$tmp" == 1 ]; then
-                    echo "ok"
-                fi   
+                count_months "$datum"     
             elif [ "$command" == "yearly" ]; then
-                if [ "$tmp" == 1 ]; then
-                    echo "ok"
-                fi     
+                count_years "$datum"       
             fi
         fi    
     done < $sheet_name
 
-    # Print results
-    if [ "$command" == "infected" ]; then
-         print_infected
-    elif [ "$command" == "gender" ]; then
-        print_genders
-    elif [ "$command" == "age" ]; then
-        print_age
-    fi    
+    print_results 
 fi
 
 exit 0
