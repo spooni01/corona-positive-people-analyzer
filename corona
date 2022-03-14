@@ -254,6 +254,9 @@ do_filters() {
     elif [ "$var_filter_a" != 0 ] && [[ "$var_filter_a_value" < "$datum" ]] && [ "$var_filter_g" != 0 ] && [ "$var_filter_g_value" == "$pohlavi" ]; then
         # Set -a and -g
         echo "1"
+    elif [ "$var_filter_g" == 0 ] && [ "$var_filter_b" == 0 ] && [ "$var_filter_g" == 0 ]; then
+        # No filter set
+        echo "1" 
     elif [ "$var_filter_g" == 0 ]; then # must be, because it can jump here from second if
         if [ "$var_filter_a" != 0 ] && [[ "$var_filter_a_value" < "$datum" ]]; then
             # Set just -a
@@ -394,6 +397,36 @@ get_date() {
     echo "$date: $count" # Print last line
 }
 
+# Print results
+print_infected() {
+    total=$(( ${genders[0]} + ${genders[1]} + ${genders[2]} ))
+    printf "$total\n" 
+}
+print_genders() {
+    printf "M: ${genders[0]}\n" 
+    printf "Z: ${genders[1]}\n" 
+    if [ "${genders[2]}" != "0" ]; then
+        printf "None: ${genders[2]}\n" 
+    fi
+}
+print_age() {
+    printf  "0-5:\t ${ages[0]}\n" 
+    printf  "6-15:\t ${ages[1]}\n"
+    printf  "16-25:\t ${ages[2]}\n"
+    printf  "26-35:\t ${ages[3]}\n"
+    printf  "36-45:\t ${ages[4]}\n"
+    printf  "46-55:\t ${ages[5]}\n"
+    printf  "56-65:\t ${ages[6]}\n"
+    printf  "66-75:\t ${ages[7]}\n"
+    printf  "76-85:\t ${ages[8]}\n"
+    printf  "86-95:\t ${ages[9]}\n"
+    printf  "96-105:\t ${ages[10]}\n"
+    printf  ">105:\t ${ages[11]}\n"
+    if [ "${ages[12]}" != "0" ]; then
+        printf  "None:\t ${ages[12]}\n"
+    fi
+}
+
 ################################################
 ################### MAIN #######################
 ################################################
@@ -404,40 +437,53 @@ export POSIXLY_CORRECT=yes
 if  [ "$1" = "-h" ] ; then
     help
 else
+    actual_line=0
     # Save filters
     save_filters "$1" "$3" "$5" "$2" "$4" "$6"
     save_sheet_name_and_command "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "$10" "$11" "$12"
 
     while IFS=, read -r id datum vek pohlavi kraj_nuts_kod okres_lau_kod nakaza_v_zahranici nakaza_zeme_csu_kod reportovano_khs
     do
+        actual_line=$((actual_line + 1))
         tmp=`do_filters`
 
-        if [ "$command" == "infected" ]; then
-            if [ "$tmp" == 1 ]; then
-                echo "ok" #todo: count it 
-            fi    
-        elif [ "$command" == "gender" ]; then
-            if [ "$tmp" == 1 ]; then
-                echo "ok"
-            fi    
-        elif [ "$command" == "age" ]; then
-            if [ "$tmp" == 1 ]; then
-                echo "ok"
-            fi    
-        elif [ "$command" == "daily" ]; then
-            if [ "$tmp" == 1 ]; then
-                echo "ok"
-            fi   
-        elif [ "$command" == "monthly" ]; then
-            if [ "$tmp" == 1 ]; then
-                echo "ok"
-            fi   
-        elif [ "$command" == "yearly" ]; then
-            if [ "$tmp" == 1 ]; then
-                echo "ok"
-            fi     
-        fi
+        if [ "$actual_line" != "1" ]; then # Skip first line
+            if [ "$command" == "infected" ]; then
+                if [ "$tmp" == "1" ]; then
+                    add_one_to_gender "$pohlavi"
+                fi    
+            elif [ "$command" == "gender" ]; then
+                if [ "$tmp" == 1 ]; then
+                    add_one_to_gender "$pohlavi"
+                fi    
+            elif [ "$command" == "age" ]; then
+                if [ "$tmp" == 1 ]; then
+                    add_one_to_ages "$vek"
+                fi    
+            elif [ "$command" == "daily" ]; then
+                if [ "$tmp" == 1 ]; then
+                    echo "ok"
+                fi   
+            elif [ "$command" == "monthly" ]; then
+                if [ "$tmp" == 1 ]; then
+                    echo "ok"
+                fi   
+            elif [ "$command" == "yearly" ]; then
+                if [ "$tmp" == 1 ]; then
+                    echo "ok"
+                fi     
+            fi
+        fi    
     done < $sheet_name
+
+    # Print results
+    if [ "$command" == "infected" ]; then
+         print_infected
+    elif [ "$command" == "gender" ]; then
+        print_genders
+    elif [ "$command" == "age" ]; then
+        print_age
+    fi    
 fi
 
 exit 0
